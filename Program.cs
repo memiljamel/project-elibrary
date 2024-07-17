@@ -1,7 +1,10 @@
+using Vite.AspNetCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddViteServices();
 
 var app = builder.Build();
 
@@ -23,5 +26,15 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+if (app.Environment.IsDevelopment())
+{
+    // WebSockets support is required for HMR (hot module reload).
+    // Uncomment the following line if your pipeline doesn't contain it.
+    app.UseWebSockets();
+    // Enable all required features to use the Vite Development Server.
+    // Pass true if you want to use the integrated middleware.
+    app.UseViteDevelopmentServer(true);
+}
 
 app.Run();
