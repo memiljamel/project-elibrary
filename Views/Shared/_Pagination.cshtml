@@ -1,0 +1,113 @@
+@using System.Text.Encodings.Web;
+
+@model X.PagedList.IPagedList
+
+@if (Model.HasNextPage || Model.HasPreviousPage)
+{
+    <nav class="inline-block w-full h-auto p-0 m-0 bg-white relative dark:bg-charleston-green" role="navigation" aria-label="Pagination navigation">
+        <div class="flex justify-between items-center gap-4 w-full h-auto p-0 m-0 sm:hidden">
+            @if (!Model.HasPreviousPage)
+            {
+                <div class="inline-block w-auto h-auto p-0 m-0 relative">
+                    <span class="block min-w-[64px] w-auto h-9 px-4 py-2 m-0 bg-transparent rounded subtitle-2 text-black/[0.60] text-center border border-solid border-chinese-white align-middle no-underline outline-none cursor-default whitespace-nowrap relative hover:bg-transparent active:bg-transparent focus:bg-transparent dark:text-white/[0.60] dark:border-dark-liver">
+                        @Html.Raw("Previous")
+                    </span>
+                </div>
+            }
+            else
+            {
+                <div class="inline-block w-auto h-auto p-0 m-0 relative">
+                    <a class="block min-w-[64px] w-auto h-9 px-4 py-2 m-0 bg-transparent rounded subtitle-2 text-black/[0.60] text-center border border-solid border-chinese-white align-middle no-underline outline-none cursor-pointer whitespace-nowrap relative hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:border-dark-liver dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" href="@Url.Action("", new { pageNumber = Model.PageNumber - 1 })">
+                        @Html.Raw("Previous")
+                    </a>
+                </div>
+            }
+
+            @if (Model.HasNextPage)
+            {
+                <div class="inline-block w-auto h-auto p-0 m-0 relative">
+                    <a class="block min-w-[64px] w-auto h-9 px-4 py-2 m-0 bg-transparent rounded subtitle-2 text-black/[0.60] text-center border border-solid border-chinese-white align-middle no-underline outline-none cursor-pointer whitespace-nowrap relative hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:border-dark-liver dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" href="@Url.Action("", new { pageNumber = Model.PageNumber + 1 })">
+                        @Html.Raw("Next")
+                    </a>
+                </div>
+            }
+            else
+            {
+                <div class="inline-block w-auto h-auto p-0 m-0 relative">
+                    <span class="block min-w-[64px] w-auto h-9 px-4 py-2 m-0 bg-transparent rounded subtitle-2 text-black/[0.60] text-center border border-solid border-chinese-white align-middle no-underline outline-none cursor-default whitespace-nowrap relative hover:bg-transparent active:bg-transparent focus:bg-transparent dark:text-white/[0.60] dark:border-dark-liver">
+                        @Html.Raw("Next")
+                    </span>
+                </div>
+            }
+        </div>
+
+        <div class="hidden justify-between items-center gap-4 w-full h-auto p-0 m-0 sm:flex sm:flex-col sm:my-2 lg:flex-row lg:m-0">
+            <div class="inline-block w-auto h-auto p-0 m-0 overflow-hidden relative">
+                <p class="block w-auto h-auto body-2 text-black/[0.87] font-normal truncate dark:text-white/[0.87]">
+                    @Html.Raw("Showing")
+                    
+                    @if (Model.PageCount > 0)
+                    {
+                        <span class="font-medium">
+                            @Model.FirstItemOnPage
+                        </span>
+
+                        @Html.Raw("to")
+
+                        <span class="font-medium">
+                            @Model.LastItemOnPage
+                        </span>
+                    }
+                    else
+                    {
+                        @Model.FirstItemOnPage
+                    }
+
+                    @Html.Raw("of")
+
+                    <span class="font-medium">
+                        @Model.TotalItemCount
+                    </span>
+
+                    @Html.Raw("rows")
+                </p>
+            </div>
+
+            @Html.PagedListPager(Model,
+                page => Url.Action("", new { pageNumber = page }),
+                new PagedListRenderOptions
+                {
+                    HtmlEncoder = HtmlEncoder.Default,
+                    DisplayLinkToFirstPage = PagedListDisplayMode.Always,
+                    DisplayLinkToLastPage = PagedListDisplayMode.Always,
+                    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+                    DisplayLinkToNextPage = PagedListDisplayMode.Always,
+                    DisplayLinkToIndividualPages = true,
+                    DisplayPageCountAndCurrentLocation = false,
+                    MaximumPageNumbersToDisplay = 10,
+                    DisplayEllipsesWhenNotShowingAllPageNumbers = true,
+                    EllipsesFormat = "&#8230;",
+                    LinkToFirstPageFormat = "<svg class=\"pointer-events-none w-full h-full fill-current\" xmlns=\"http://www.w3.org/2000/svg\" enable-background=\"new 0 0 24 24\" height=\"24px\" viewBox=\"0 0 24 24\" width=\"24px\" fill=\"000\"><g><rect fill=\"none\" height=\"24\" width=\"24\"/></g><g><g><polygon points=\"17.59,18 19,16.59 14.42,12 19,7.41 17.59,6 11.59,12\"/><polygon points=\"11,18 12.41,16.59 7.83,12 12.41,7.41 11,6 5,12\"/></g></g></svg>",
+                    LinkToPreviousPageFormat = "<svg class=\"pointer-events-none w-full h-full fill-current\" xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\" viewBox=\"0 0 24 24\" width=\"24px\" fill=\"000\"><path d=\"M0 0h24v24H0V0z\" fill=\"none\"/><path d=\"M15.41 16.59L10.83 12l4.58-4.59L14 6l-6 6 6 6 1.41-1.41z\"/></svg>",
+                    LinkToIndividualPageFormat = "{0}",
+                    LinkToNextPageFormat = "<svg class=\"pointer-events-none w-full h-full fill-current\" xmlns=\"http://www.w3.org/2000/svg\" height=\"24px\" viewBox=\"0 0 24 24\" width=\"24px\" fill=\"000\"><path d=\"M0 0h24v24H0V0z\" fill=\"none\"/><path d=\"M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z\"/></svg>",
+                    LinkToLastPageFormat = "<svg class=\"pointer-events-none w-full h-full fill-current\" xmlns=\"http://www.w3.org/2000/svg\" enable-background=\"new 0 0 24 24\" height=\"24px\" viewBox=\"0 0 24 24\" width=\"24px\" fill=\"000\"><g><rect fill=\"none\" height=\"24\" width=\"24\"/></g><g><g><polygon points=\"6.41,6 5,7.41 9.58,12 5,16.59 6.41,18 12.41,12\"/><polygon points=\"13,6 11.59,7.41 16.17,12 11.59,16.59 13,18 19,12\"/></g></g></svg>",
+                    PageCountAndCurrentLocationFormat = "Page {0} of {1}.",
+                    ItemSliceAndTotalFormat = "Showing items {0} through {1} of {2}.",
+                    ItemSliceAndTotalPosition = ItemSliceAndTotalPosition.Start,
+                    FunctionToDisplayEachPageNumber = null,
+                    ClassToApplyToFirstListItemInPager = null,
+                    ClassToApplyToLastListItemInPager = null,
+                    ContainerDivClasses = new[] { "inline-block w-auto h-auto p-0 m-0 overflow-hidden relative" },
+                    UlElementClasses = new[] { "flex w-auto h-auto p-0 m-0 rounded shadow-none -space-x-px isolate" },
+                    LiElementClasses = new[] { "group inline-block w-auto h-auto p-0 m-0 relative *:first:rounded-l *:last:rounded-r" },
+                    PageClasses = new[] { "flex justify-center items-center min-w-[36px] w-auto h-9 p-2 m-0 bg-transparent border border-solid border-chinese-white rounded-none subtitle-2 text-black/[0.60] text-center no-underline outline-none cursor-default whitespace-nowrap relative hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:border-dark-liver dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12] group-[.active]:bg-primary group-[.active]:border-primary group-[.active]:text-white group-[.active]:hover:bg-primary group-[.active]:active:bg-primary group-[.active]:focus:bg-primary group-[.active]:dark:text-black group-[.disabled]:text-black/[0.38] group-[.disabled]:hover:bg-transparent group-[.disabled]:active:bg-transparent group-[.disabled]:focus:bg-transparent group-[.disabled]:dark:text-white/[0.38] group-[.disabled]:cursor-not-allowed group-has-[a[href]]:cursor-pointer" },
+                    UlElementattributes = null,
+                    ActiveLiElementClass = "active",
+                    EllipsesElementClass = string.Empty,
+                    PreviousElementClass = string.Empty,
+                    NextElementClass = string.Empty
+                })
+        </div>
+    </nav>
+}
