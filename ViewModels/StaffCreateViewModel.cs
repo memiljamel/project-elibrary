@@ -1,18 +1,19 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ELibrary.Models;
 
-namespace ELibrary.Models
+namespace ELibrary.ViewModels
 {
     public class StaffCreateViewModel
     {
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
-        
         [Display(Name = "Employee Number")]
         [Required]
         [StringLength(16)]
         public string EmployeeNumber { get; set; }
         
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; }
+
         [Display(Name = "Role")]
         [Required]
         public AccessLevel AccessLevel { get; set; }
