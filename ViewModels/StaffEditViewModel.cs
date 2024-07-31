@@ -1,21 +1,24 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using ELibrary.Models;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
-namespace ELibrary.Models
+namespace ELibrary.ViewModels
 {
    public class StaffEditViewModel
     {
         [Required]
+        [HiddenInput]
         public Guid ID { get; set; }
-        
-        [Required]
-        [StringLength(100)]
-        public string Name { get; set; }
         
         [Display(Name = "Employee Number")]
         [Required]
         [StringLength(16)]
         public string EmployeeNumber { get; set; }
+        
+        [Required]
+        [StringLength(100)]
+        public string Name { get; set; }
         
         [Display(Name = "Role")]
         [Required]

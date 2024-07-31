@@ -1,4 +1,4 @@
-namespace ELibrary.Models
+namespace ELibrary.ViewModels
 {
     public class ErrorViewModel
     {

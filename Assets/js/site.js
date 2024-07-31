@@ -9,6 +9,7 @@
     Toast,
 } from 'tw-elements';
 import './aspnet-client-validation';
+import './autosize';
 
 /** Offcanvas */
 const offcanvasList = [].slice.call(

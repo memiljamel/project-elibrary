@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "aspnet-client-validation": "^0.10.1",
+    "autosize": "^6.0.1",
     "tw-elements": "^1.1.0"
   }
 }

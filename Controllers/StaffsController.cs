@@ -1,5 +1,6 @@
 using ELibrary.Data;
 using ELibrary.Models;
+using ELibrary.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList.EF;
@@ -17,9 +18,9 @@ namespace ELibrary.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string searchString, int pageNumber = 1)
+        public async Task<IActionResult> Index(string search, int pageNumber = 1)
         {
-            ViewData["SearchString"] = searchString;
+            ViewData["Search"] = search;
 
             if (pageNumber < 1)
             {
@@ -28,14 +29,22 @@ namespace ELibrary.Controllers
 
             var query = _context.Staffs.AsQueryable();
 
-            if (!string.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(s => s.Username.ToLower().Contains(searchString.ToLower()) || 
-                                         s.Name.ToLower().Contains(searchString.ToLower()) || 
-                                         s.EmployeeNumber.ToLower().Contains(searchString.ToLower()));
+                query = query.Where(s => s.EmployeeNumber.ToLower().Contains(search.ToLower()) ||
+                                         s.Name.ToLower().Contains(search.ToLower()) ||
+                                         s.Username.ToLower().Contains(search.ToLower()));
             }
 
-            var staffs = await query.ToPagedListAsync(pageNumber, 15);
+            var staffs = await query.Select(s => new StaffViewModel
+                {
+                    ID = s.ID,
+                    EmployeeNumber = s.EmployeeNumber,
+                    Name = s.Name,
+                    AccessLevel = s.AccessLevel,
+                    Username = s.Username
+                })
+                .ToPagedListAsync(pageNumber, 15);
 
             if (staffs.PageNumber != 1 && pageNumber > staffs.PageCount)
             {
@@ -59,7 +68,18 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            return View(staff);
+            var item = new StaffViewModel
+            {
+                ID = staff.ID,
+                EmployeeNumber = staff.EmployeeNumber,
+                Name = staff.Name,
+                AccessLevel = staff.AccessLevel,
+                Username = staff.Username,
+                CreatedAt = staff.CreatedAt,
+                UpdatedAt = staff.UpdatedAt
+            };
+
+            return View(item);
         }
 
         [HttpGet]
@@ -80,11 +100,11 @@ namespace ELibrary.Controllers
                 {
                     var staff = new Staff
                     {
-                        Username = item.Username,
-                        Password = BC.HashPassword(item.Password),
-                        Name = item.Name,
                         EmployeeNumber = item.EmployeeNumber,
+                        Name = item.Name,
                         AccessLevel = item.AccessLevel,
+                        Username = item.Username,
+                        Password = BC.HashPassword(item.Password)
                     };
                     _context.Add(staff);
                     await _context.SaveChangesAsync();
@@ -96,8 +116,8 @@ namespace ELibrary.Controllers
                 catch (DbUpdateException)
                 {
                     ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                 "Try again, and if the problem persists " +
-                                                 "see your system administrator.");
+                                                           "Try again, and if the problem persists " +
+                                                           "see your system administrator.");
                 }
             }
 
@@ -112,7 +132,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var staff = await _context.Staffs.FindAsync(id);
+            var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
             if (staff == null)
             {
                 return NotFound();
@@ -121,8 +141,8 @@ namespace ELibrary.Controllers
             var item = new StaffEditViewModel
             {
                 ID = staff.ID,
-                Name = staff.Name,
                 EmployeeNumber = staff.EmployeeNumber,
+                Name = staff.Name,
                 AccessLevel = staff.AccessLevel,
                 Username = staff.Username
             };
@@ -146,9 +166,14 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var staff = await _context.Staffs.FindAsync(id);
-                    staff.Name = item.Name;
+                    var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
+                    if (staff == null)
+                    {
+                        return NotFound();
+                    }
+                    
                     staff.EmployeeNumber = item.EmployeeNumber;
+                    staff.Name = item.Name;
                     staff.AccessLevel = item.AccessLevel;
 
                     if (!string.IsNullOrEmpty(item.Password))
@@ -158,16 +183,16 @@ namespace ELibrary.Controllers
 
                     _context.Update(staff);
                     await _context.SaveChangesAsync();
-                
+
                     TempData["Message"] = "The staff has been updated.";
-                
+
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateException)
                 {
                     ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                 "Try again, and if the problem persists, " +
-                                                 "see your system administrator.");
+                                                           "Try again, and if the problem persists, " +
+                                                           "see your system administrator.");
                 }
             }
 
@@ -178,14 +203,14 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var staff = await _context.Staffs.FindAsync(id);
+            var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
             if (staff != null)
             {
-                _context.Staffs.Remove(staff);
+                _context.Remove(staff);
             }
 
             await _context.SaveChangesAsync();
-            
+
             TempData["Message"] = "The staff has been deleted.";
 
             return RedirectToAction(nameof(Index));
