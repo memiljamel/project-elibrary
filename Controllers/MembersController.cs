@@ -26,7 +26,9 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var query = _context.Members.AsQueryable();
+            var query = _context.Members
+                .Include(m => m.Phones)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -37,7 +39,8 @@ namespace ELibrary.Controllers
                                          m.Address.ToLower().Contains(search.ToLower()));
             }
 
-            var members = await query.Select(m => new MemberViewModel
+            var members = await query.OrderByDescending(m => m.CreatedAt)
+                .Select(m => new MemberViewModel
                 {
                     ID = m.ID,
                     MemberNumber = m.MemberNumber,
@@ -183,12 +186,12 @@ namespace ELibrary.Controllers
                     member.Name = item.Name;
                     member.Email = item.Email;
                     member.Address = item.Address;
+                    member.UpdatedAt = DateTime.UtcNow;
 
                     member.Phones.Clear();
                     member.Phones = item.PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
                         .Select(p => new Phone { PhoneNumber = p.Trim() })
                         .ToList();
-
                     _context.Update(member);
                     await _context.SaveChangesAsync();
 
@@ -216,7 +219,7 @@ namespace ELibrary.Controllers
                 .FirstOrDefaultAsync(m => m.ID == id);
             if (member != null)
             {
-                _context.Phones.RemoveRange(member.Phones);
+                member.Phones.Clear();
                 _context.Remove(member);
             }
 

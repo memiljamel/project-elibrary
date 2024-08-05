@@ -5,72 +5,16 @@
     Offcanvas, 
     PerfectScrollbar, 
     Select, 
-    Tooltip,
     Toast,
+    Tooltip,
 } from 'tw-elements';
 import './aspnet-client-validation';
 import './autosize';
 
-/** Offcanvas */
-const offcanvasList = [].slice.call(
-    document.querySelectorAll('[data-te-offcanvas-init]')
-);
-
-offcanvasList.map((offcanvasItem) => {
-    return new Offcanvas(offcanvasItem, {
-        backdrop: true,
-        keyboard: true,
-        scroll: false,
-    });
-});
-
-/** Tooltip Handler */
-const tooltipList = [].slice.call(
-    document.querySelectorAll('[data-te-toggle="tooltip"]')
-);
-
-tooltipList.map((tooltipItem) => {
-    return new Tooltip(tooltipItem, {
-        animation: true,
-        template: `
-            <div class="z-30" role="tooltip">
-                <div class="tooltip-inner inline-block bg-dark-charcoal text-white font-medium rounded caption min-h-[14px] px-2 py-1 dark:bg-lotion dark:text-black"></div>
-            </div>
-        `,
-        trigger: 'hover focus',
-        title: '',
-        delay: 200,
-        html: false,
-        selector: false,
-        placement: 'bottom',
-        offset: ({placement, reference, popper}) => {
-            if (placement === 'bottom') {
-                return [0, 0];
-            } else {
-                return [0, 8];
-            }
-        },
-        container: false,
-        fallbackPlacements: [
-            'top',
-            'right',
-            'bottom',
-            'left',
-        ],
-        boundary: 'window',
-        customClass: '',
-        sanitize: true,
-        sanitizeFn: null,
-        popperConfig: {
-            hide: true,
-        },
-    });
-});
-
 /** Dropdown Handler */
 const dropdownList = [].slice.call(
     document.querySelectorAll('[data-te-dropdown-toggle-ref]')
-)
+);
 
 dropdownList.map((dropdownItem) => {
     return new Dropdown(dropdownItem, {
@@ -118,6 +62,19 @@ inputList.map((inputItem) => {
             "border-neutral-200 group-data-[te-input-focused]:shadow-[1px_0_0_#ffffff,_0_-1px_0_0_#ffffff,_0_1px_0_0_#ffffff] group-data-[te-input-focused]:border-white",
         counter:
             "text-right leading-[1.6]",
+    });
+});
+
+/** Offcanvas */
+const offcanvasList = [].slice.call(
+    document.querySelectorAll('[data-te-offcanvas-init]')
+);
+
+offcanvasList.map((offcanvasItem) => {
+    return new Offcanvas(offcanvasItem, {
+        backdrop: true,
+        keyboard: true,
+        scroll: false,
     });
 });
 
@@ -331,14 +288,57 @@ toastList.map((toastItem) => {
     Toast.getInstance(toastItem).show();
 });
 
+/** Tooltip Handler */
+const tooltipList = [].slice.call(
+    document.querySelectorAll('[data-te-toggle="tooltip"]')
+);
+
+tooltipList.map((tooltipItem) => {
+    return new Tooltip(tooltipItem, {
+        animation: true,
+        template: `
+            <div class="z-30" role="tooltip">
+                <div class="tooltip-inner inline-block bg-dark-charcoal text-white font-medium rounded caption min-h-[14px] px-2 py-1 dark:bg-lotion dark:text-black"></div>
+            </div>
+        `,
+        trigger: 'hover focus',
+        title: '',
+        delay: 200,
+        html: false,
+        selector: false,
+        placement: 'bottom',
+        offset: ({placement, reference, popper}) => {
+            if (placement === 'bottom') {
+                return [0, 0];
+            } else {
+                return [0, 8];
+            }
+        },
+        container: false,
+        fallbackPlacements: [
+            'top',
+            'right',
+            'bottom',
+            'left',
+        ],
+        boundary: 'window',
+        customClass: '',
+        sanitize: true,
+        sanitizeFn: null,
+        popperConfig: {
+            hide: true,
+        },
+    });
+});
+
 initTE({
-    Offcanvas,
-    Tooltip,
     Dropdown,
     Input,
-    Select,
+    Offcanvas,
     PerfectScrollbar,
+    Select,
     Toast,
+    Tooltip,
 }, {
     allowReinits: true,
 });

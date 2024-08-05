@@ -29,6 +29,5 @@ namespace ELibrary.Models
         public string Email { get; set; }
 
         public ICollection<Phone> Phones { get; set; }
-        public ICollection<MemberLibrary> MembersLibraries { get; set; }
     }
 }

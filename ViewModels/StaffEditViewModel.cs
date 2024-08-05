@@ -13,7 +13,7 @@ namespace ELibrary.ViewModels
         
         [Display(Name = "Employee Number")]
         [Required]
-        [StringLength(16)]
+        [StringLength(16, MinimumLength = 8)]
         public string EmployeeNumber { get; set; }
         
         [Required]
@@ -22,6 +22,7 @@ namespace ELibrary.ViewModels
         
         [Display(Name = "Role")]
         [Required]
+        [EnumDataType(typeof(AccessLevel))]
         public AccessLevel AccessLevel { get; set; }
         
         [ValidateNever]

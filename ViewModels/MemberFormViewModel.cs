@@ -11,7 +11,7 @@ namespace ELibrary.ViewModels
         
         [Display(Name = "Member Number")]
         [Required]
-        [StringLength(16)]
+        [StringLength(16, MinimumLength = 8)]
         public string MemberNumber { get; set; }
         
         [Required]
@@ -19,6 +19,7 @@ namespace ELibrary.ViewModels
         public string Name { get; set; }
         
         [Required]
+        [EmailAddress]
         [StringLength(100)]
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
