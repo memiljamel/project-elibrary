@@ -11,7 +11,7 @@ namespace ELibrary.Data
         {
         }
 
-        public DbSet<Staff> Staffs { get; set; }
+        public DbSet<Employee> Employees { get; set; }
         public DbSet<Member> Members { get; set; }
         public DbSet<Phone> Phones { get; set; }
         public DbSet<Book> Books { get; set; }
@@ -20,7 +20,7 @@ namespace ELibrary.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var staffs = new Faker<Staff>()
+            var employees = new Faker<Employee>()
                 .RuleFor(s => s.ID, f => Guid.NewGuid())
                 .RuleFor(s => s.Username, f => f.Internet.UserName())
                 .RuleFor(s => s.Password, f => f.Internet.Password())
@@ -86,7 +86,7 @@ namespace ELibrary.Data
                 booksAuthors.AddRange(bookAuthors);
             }
             
-            modelBuilder.Entity<Staff>().HasData(staffs);
+            modelBuilder.Entity<Employee>().HasData(employees);
             modelBuilder.Entity<Member>().HasData(members);
             modelBuilder.Entity<Phone>().HasData(phones);
             modelBuilder.Entity<Book>().HasData(books);

@@ -8,11 +8,11 @@ using BC = BCrypt.Net.BCrypt;
 
 namespace ELibrary.Controllers
 {
-    public class StaffsController : Controller
+    public class EmployeesController : Controller
     {
         private readonly ELibraryContext _context;
 
-        public StaffsController(ELibraryContext context)
+        public EmployeesController(ELibraryContext context)
         {
             _context = context;
         }
@@ -27,7 +27,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var query = _context.Staffs.AsQueryable();
+            var query = _context.Employees.AsQueryable();
 
             if (!string.IsNullOrEmpty(search))
             {
@@ -37,7 +37,7 @@ namespace ELibrary.Controllers
             }
 
             var staffs = await query.OrderByDescending(s => s.CreatedAt)
-                .Select(s => new StaffViewModel
+                .Select(s => new EmployeeViewModel
                 {
                     ID = s.ID,
                     EmployeeNumber = s.EmployeeNumber,
@@ -63,13 +63,13 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
+            var staff = await _context.Employees.FirstOrDefaultAsync(s => s.ID == id);
             if (staff == null)
             {
                 return NotFound();
             }
 
-            var item = new StaffViewModel
+            var item = new EmployeeViewModel
             {
                 ID = staff.ID,
                 EmployeeNumber = staff.EmployeeNumber,
@@ -93,13 +93,13 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
             [Bind("Name,EmployeeNumber,AccessLevel,Username,Password,PasswordConfirmation")]
-            StaffCreateViewModel item)
+            EmployeeCreateViewModel item)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var staff = new Staff
+                    var staff = new Employee
                     {
                         EmployeeNumber = item.EmployeeNumber,
                         Name = item.Name,
@@ -133,13 +133,13 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
+            var staff = await _context.Employees.FirstOrDefaultAsync(s => s.ID == id);
             if (staff == null)
             {
                 return NotFound();
             }
 
-            var item = new StaffEditViewModel
+            var item = new EmployeeEditViewModel
             {
                 ID = staff.ID,
                 EmployeeNumber = staff.EmployeeNumber,
@@ -156,7 +156,7 @@ namespace ELibrary.Controllers
         public async Task<IActionResult> Edit(
             Guid id,
             [Bind("ID,Name,EmployeeNumber,AccessLevel,Username,Password,PasswordConfirmation")]
-            StaffEditViewModel item)
+            EmployeeEditViewModel item)
         {
             if (id != item.ID)
             {
@@ -167,7 +167,7 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
+                    var staff = await _context.Employees.FirstOrDefaultAsync(s => s.ID == id);
                     if (staff == null)
                     {
                         return NotFound();
@@ -205,7 +205,7 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
+            var staff = await _context.Employees.FirstOrDefaultAsync(s => s.ID == id);
             if (staff != null)
             {
                 _context.Remove(staff);

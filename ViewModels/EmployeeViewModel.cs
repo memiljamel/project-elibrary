@@ -3,7 +3,7 @@ using ELibrary.Models;
 
 namespace ELibrary.ViewModels
 {
-    public class StaffViewModel
+    public class EmployeeViewModel
     {
         public Guid ID { get; set; }
         
