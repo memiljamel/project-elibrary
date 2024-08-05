@@ -11,10 +11,10 @@ namespace ELibrary.Models
         Staff
     }
     
-    [Table("staffs")]
+    [Table("employees")]
     [Index(nameof(Username), IsUnique = true)]
     [Index(nameof(EmployeeNumber), IsUnique = true)]
-    public class Staff : BaseEntity
+    public class Employee : BaseEntity
     {
         [Required]
         [Column("username", Order = 1)]
