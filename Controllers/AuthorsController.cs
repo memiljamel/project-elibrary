@@ -4,15 +4,14 @@ using ELibrary.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList.EF;
-using BC = BCrypt.Net.BCrypt;
 
 namespace ELibrary.Controllers
 {
-    public class StaffsController : Controller
+    public class AuthorsController : Controller
     {
         private readonly ELibraryContext _context;
 
-        public StaffsController(ELibraryContext context)
+        public AuthorsController(ELibraryContext context)
         {
             _context = context;
         }
@@ -27,32 +26,32 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var query = _context.Staffs.AsQueryable();
-
+            var query = _context.Authors
+                .Include(a => a.BooksAuthors)
+                .AsQueryable();
+            
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(s => s.EmployeeNumber.ToLower().Contains(search.ToLower()) ||
-                                         s.Name.ToLower().Contains(search.ToLower()) ||
-                                         s.Username.ToLower().Contains(search.ToLower()));
+                query = query.Where(s => s.Name.ToLower().Contains(search.ToLower()) ||
+                                         s.Email.ToLower().Contains(search.ToLower()));
             }
 
-            var staffs = await query.OrderByDescending(s => s.CreatedAt)
-                .Select(s => new StaffViewModel
+            var authors = await query.OrderByDescending(s => s.CreatedAt)
+                .Select(a => new AuthorViewModel
                 {
-                    ID = s.ID,
-                    EmployeeNumber = s.EmployeeNumber,
-                    Name = s.Name,
-                    AccessLevel = s.AccessLevel,
-                    Username = s.Username
+                    ID = a.ID,
+                    Name = a.Name,
+                    Email = a.Email,
+                    BookCount = a.BooksAuthors.Count
                 })
                 .ToPagedListAsync(pageNumber, 15);
-
-            if (staffs.PageNumber != 1 && pageNumber > staffs.PageCount)
+            
+            if (authors.PageNumber != 1 && pageNumber > authors.PageCount)
             {
                 return NotFound();
             }
-
-            return View(staffs);
+            
+            return View(authors);
         }
 
         [HttpGet]
@@ -63,21 +62,22 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
-            if (staff == null)
+            var author = await _context.Authors
+                .Include(a => a.BooksAuthors)
+                .FirstOrDefaultAsync(m => m.ID == id);
+            if (author == null)
             {
                 return NotFound();
             }
 
-            var item = new StaffViewModel
+            var item = new AuthorViewModel
             {
-                ID = staff.ID,
-                EmployeeNumber = staff.EmployeeNumber,
-                Name = staff.Name,
-                AccessLevel = staff.AccessLevel,
-                Username = staff.Username,
-                CreatedAt = staff.CreatedAt,
-                UpdatedAt = staff.UpdatedAt
+                ID = author.ID,
+                Name = author.Name,
+                Email = author.Email,
+                BookCount = author.BooksAuthors.Count,
+                CreatedAt = author.CreatedAt,
+                UpdatedAt = author.UpdatedAt
             };
 
             return View(item);
@@ -88,29 +88,25 @@ namespace ELibrary.Controllers
         {
             return View();
         }
-
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("Name,EmployeeNumber,AccessLevel,Username,Password,PasswordConfirmation")]
-            StaffCreateViewModel item)
+            [Bind("ID,Name,Email")] AuthorFormViewModel item)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var staff = new Staff
+                    var author = new Author
                     {
-                        EmployeeNumber = item.EmployeeNumber,
                         Name = item.Name,
-                        AccessLevel = item.AccessLevel,
-                        Username = item.Username,
-                        Password = BC.HashPassword(item.Password)
+                        Email = item.Email
                     };
-                    _context.Add(staff);
+                    _context.Add(author);
                     await _context.SaveChangesAsync();
 
-                    TempData["Message"] = "The staff has been created.";
+                    TempData["Message"] = "The author has been created.";
 
                     return RedirectToAction(nameof(Index));
                 }
@@ -121,7 +117,7 @@ namespace ELibrary.Controllers
                                                            "see your system administrator.");
                 }
             }
-
+            
             return View(item);
         }
 
@@ -133,87 +129,77 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
-            if (staff == null)
+            var author = await _context.Authors.FirstOrDefaultAsync(s => s.ID == id);
+            if (author == null)
             {
                 return NotFound();
             }
 
-            var item = new StaffEditViewModel
+            var item = new AuthorFormViewModel
             {
-                ID = staff.ID,
-                EmployeeNumber = staff.EmployeeNumber,
-                Name = staff.Name,
-                AccessLevel = staff.AccessLevel,
-                Username = staff.Username
+                ID = author.ID,
+                Name = author.Name,
+                Email = author.Email
             };
-
+            
             return View(item);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
-            Guid id,
-            [Bind("ID,Name,EmployeeNumber,AccessLevel,Username,Password,PasswordConfirmation")]
-            StaffEditViewModel item)
+            Guid id, 
+            [Bind("ID,Name,Email")] AuthorFormViewModel item)
         {
             if (id != item.ID)
             {
                 return NotFound();
             }
-            
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
-                    if (staff == null)
+                    var author = await _context.Authors.FirstOrDefaultAsync(s => s.ID == id);
+                    if (author == null)
                     {
                         return NotFound();
                     }
-                    
-                    staff.EmployeeNumber = item.EmployeeNumber;
-                    staff.Name = item.Name;
-                    staff.AccessLevel = item.AccessLevel;
-                    staff.UpdatedAt = DateTime.UtcNow;
 
-                    if (!string.IsNullOrEmpty(item.Password))
-                    {
-                        staff.Password = BC.HashPassword(item.Password);
-                    }
-
-                    _context.Update(staff);
+                    author.Name = item.Name;
+                    author.Email = item.Email;
+                    author.UpdatedAt = DateTime.UtcNow;
+                    _context.Update(author);
                     await _context.SaveChangesAsync();
 
-                    TempData["Message"] = "The staff has been updated.";
-
+                    TempData["Message"] = "The author has been updated.";
+                    
                     return RedirectToAction(nameof(Index));
                 }
-                catch (DbUpdateException)
+                catch (DbUpdateConcurrencyException)
                 {
                     ModelState.AddModelError(string.Empty, "Unable to save changes. " +
                                                            "Try again, and if the problem persists, " +
                                                            "see your system administrator.");
                 }
             }
-
+            
             return View(item);
         }
-
+        
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var staff = await _context.Staffs.FirstOrDefaultAsync(s => s.ID == id);
-            if (staff != null)
+            var author = await _context.Authors.FirstOrDefaultAsync(s => s.ID == id);
+            if (author != null)
             {
-                _context.Remove(staff);
+                _context.Authors.Remove(author);
             }
 
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = "The staff has been deleted.";
+            TempData["Message"] = "The author has been deleted.";
 
             return RedirectToAction(nameof(Index));
         }
