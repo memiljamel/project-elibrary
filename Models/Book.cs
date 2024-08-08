@@ -44,6 +44,8 @@ namespace ELibrary.Models
         [Required]
         [Column("qty", Order = 6)]
         public int Quantity { get; set; }
+
+        public ICollection<Borrowing> Borrowings { get; set; }
         
         public ICollection<BookAuthor> BooksAuthors { get; set; }
     }

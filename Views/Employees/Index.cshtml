@@ -1,7 +1,7 @@
 ﻿@model IPagedList<ELibrary.ViewModels.EmployeeViewModel>
 
 @{
-	ViewData["Title"] = "Employee";
+	ViewData["Title"] = "Employees";
 }
 
 <div class="flex flex-col w-full h-full p-0 m-0 relative">
@@ -24,7 +24,7 @@
 
 					<li class="inline-block w-auto h-auto p-0 m-0 relative [&+li::before]:content-['/'] [&+li::before]:mx-1 [&+li::before]:text-black/[0.60] dark:[&+li::before]:text-white/[0.60]">
 						<span class="inline-block w-auto h-auto p-0 m-0 subtitle-1 text-black/[0.60] cursor-default dark:text-white/[0.60]">
-							@Html.Raw("Employee")
+							@Html.Raw("Employees")
 						</span>
 					</li>
 				</ol>
@@ -51,7 +51,7 @@
 						<div class="flex-1 block w-auto h-auto p-0 m-0 overflow-hidden relative basis-auto order-1 sm:order-none">
 							<div class="block w-full h-auto p-0 m-0 relative">
 								<h6 class="block w-full h-auto px-2 py-1.5 m-0 headline-6 text-black/[0.87] truncate dark:text-white/[0.87]">
-									@Html.Raw("All Employee")
+									@Html.Raw("All Employees")
 								</h6>
 							</div>
 						</div>

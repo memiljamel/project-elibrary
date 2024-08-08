@@ -1,7 +1,7 @@
-@model ELibrary.ViewModels.BookViewModel
+@model ELibrary.ViewModels.BorrowingViewModel
 
 @{
-    ViewData["Title"] = "Books";
+    ViewData["Title"] = "Borrowings";
 }
 
 <div class="flex flex-col w-full h-full p-0 m-0 relative">
@@ -23,14 +23,14 @@
 					</li>
 
 					<li class="inline-block w-auto h-auto p-0 m-0 relative [&+li::before]:content-['/'] [&+li::before]:mx-1 [&+li::before]:text-black/[0.60] dark:[&+li::before]:text-white/[0.60]">
-						<a class="inline-block w-auto h-auto p-0 m-0 subtitle-1 text-primary no-underline outline-none cursor-pointer hover:underline focus:underline active:underline" asp-controller="Books" asp-action="Index">
-							@Html.Raw("Books")
+						<a class="inline-block w-auto h-auto p-0 m-0 subtitle-1 text-primary no-underline outline-none cursor-pointer hover:underline focus:underline active:underline" asp-controller="Borrowings" asp-action="Index">
+							@Html.Raw("Borrowings")
 						</a>
 					</li>
 					
 					<li class="inline-block w-auto h-auto p-0 m-0 relative [&+li::before]:content-['/'] [&+li::before]:mx-1 [&+li::before]:text-black/[0.60] dark:[&+li::before]:text-white/[0.60]">
 						<span class="inline-block w-auto h-auto p-0 m-0 subtitle-1 text-black/[0.60] cursor-default dark:text-white/[0.60]">
-							@Model.Title
+							@Model.MemberNumber
 						</span>
 					</li>
 				</ol>
@@ -47,7 +47,7 @@
 							
 							@* Icon Button *@
 							<div class="inline-block w-auto h-auto p-0 m-0 relative">
-								<a class="block w-10 h-10 p-2 m-0 bg-transparent rounded-full text-black/[0.60] outline-none cursor-pointer align-middle transition duration-150 ease-in-out hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Books" asp-action="Index" data-te-toggle="tooltip" title="Back">
+								<a class="block w-10 h-10 p-2 m-0 bg-transparent rounded-full text-black/[0.60] outline-none cursor-pointer align-middle transition duration-150 ease-in-out hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Borrowings" asp-action="Index" data-te-toggle="tooltip" title="Back">
 									<svg class="pointer-events-none w-full h-full fill-current" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
 										<path d="M0 0h24v24H0z" fill="none"/>
 										<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>
@@ -67,11 +67,11 @@
 						</div>
 						
 						<div class="flex justify-start items-center gap-2 w-auto h-auto p-0 m-0 overflow-hidden relative">
-							<form class="contents w-auto h-auto p-0 m-0 relative" asp-controller="Books" asp-action="Delete" asp-route-id="@Model.ID" method="POST">
+							<form class="contents w-auto h-auto p-0 m-0 relative" asp-controller="Borrowings" asp-action="Delete" asp-route-id="@Model.ID" method="POST">
 								
 								@* Icon Link *@
 								<div class="inline-block w-auto h-auto p-0 m-0 relative">
-									<a class="block w-10 h-10 p-2 m-0 bg-transparent rounded-full text-black/[0.60] outline-none cursor-pointer align-middle transition duration-150 ease-in-out hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Books" asp-action="Edit" asp-route-id="@Model.ID" data-te-toggle="tooltip" title="Edit">
+									<a class="block w-10 h-10 p-2 m-0 bg-transparent rounded-full text-black/[0.60] outline-none cursor-pointer align-middle transition duration-150 ease-in-out hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Borrowings" asp-action="Edit" asp-route-id="@Model.ID" data-te-toggle="tooltip" title="Edit">
 										<svg class="pointer-events-none w-full h-full fill-current" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
 											<path d="M0 0h24v24H0z" fill="none" />
 											<path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z" />
@@ -116,87 +116,71 @@
 									</div>
 								</div>
 							</li>
-
-							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
-								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 subtitle-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayNameFor(model => model.Title)
-										</span>
-									</div>
-
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 body-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayFor(model => model.Title)
-										</span>
-									</div>
-								</div>
-							</li>
-
-							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
-								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 subtitle-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayNameFor(model => model.AuthorNames)
-										</span>
-									</div>
-
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 body-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayFor(model => model.AuthorNames)
-										</span>
-									</div>
-								</div>
-							</li>
-
-							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
-								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 subtitle-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayNameFor(model => model.Category)
-										</span>
-									</div>
-
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 body-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayFor(model => model.Category)
-										</span>
-									</div>
-								</div>
-							</li>
-
-							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
-								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 subtitle-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayNameFor(model => model.Publisher)
-										</span>
-									</div>
-
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 body-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayFor(model => model.Publisher)
-										</span>
-									</div>
-								</div>
-							</li>
-
-							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
-								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 subtitle-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayNameFor(model => model.Quantity)
-										</span>
-									</div>
-
-									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
-										<span class="block w-full h-auto p-0 m-0 body-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
-											@Html.DisplayFor(model => model.Quantity)
-										</span>
-									</div>
-								</div>
-							</li>
 							
+							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
+								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
+									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
+										<span class="block w-full h-auto p-0 m-0 subtitle-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
+											@Html.DisplayNameFor(model => model.MemberNumber)
+										</span>
+									</div>
+
+									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
+										<span class="block w-full h-auto p-0 m-0 body-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
+											@Html.DisplayFor(model => model.MemberNumber)
+										</span>
+									</div>
+								</div>
+							</li>
+
+							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
+								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
+									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
+										<span class="block w-full h-auto p-0 m-0 subtitle-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
+											@Html.DisplayNameFor(model => model.BookTitle)
+										</span>
+									</div>
+
+									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
+										<span class="block w-full h-auto p-0 m-0 body-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
+											@Html.DisplayFor(model => model.BookTitle)
+										</span>
+									</div>
+								</div>
+							</li>
+
+							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
+								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
+									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
+										<span class="block w-full h-auto p-0 m-0 subtitle-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
+											@Html.DisplayNameFor(model => model.DateBorrow)
+										</span>
+									</div>
+
+									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
+										<span class="block w-full h-auto p-0 m-0 body-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
+											@Html.DisplayFor(model => model.DateBorrow)
+										</span>
+									</div>
+								</div>
+							</li>
+
+							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
+								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
+									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
+										<span class="block w-full h-auto p-0 m-0 subtitle-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
+											@Html.DisplayNameFor(model => model.DateReturn)
+										</span>
+									</div>
+
+									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">
+										<span class="block w-full h-auto p-0 m-0 body-2 text-black/[0.87] text-left leading-6 truncate dark:text-white/[0.87]">
+											@Html.DisplayFor(model => model.DateReturn)
+										</span>
+									</div>
+								</div>
+							</li>
+
 							<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
 								<div class="flex flex-col justify-between items-stretch !gap-1 w-full h-auto !px-0 py-4 m-0 border-b border-solid border-chinese-white text-black/[0.60] no-underline outline-none whitespace-nowrap overflow-hidden select-none dark:border-dark-liver lg:flex-row lg:!gap-8 lg:min-h-[52px] lg:py-3.5">
 									<div class="flex-1 inline-block w-full h-auto p-0 m-0 overflow-hidden relative">

@@ -31,28 +31,28 @@ namespace ELibrary.Controllers
 
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(s => s.EmployeeNumber.ToLower().Contains(search.ToLower()) ||
-                                         s.Name.ToLower().Contains(search.ToLower()) ||
-                                         s.Username.ToLower().Contains(search.ToLower()));
+                query = query.Where(e => e.EmployeeNumber.ToLower().Contains(search.ToLower()) ||
+                                         e.Name.ToLower().Contains(search.ToLower()) ||
+                                         e.Username.ToLower().Contains(search.ToLower()));
             }
 
-            var staffs = await query.OrderByDescending(s => s.CreatedAt)
-                .Select(s => new EmployeeViewModel
+            var employees = await query.OrderByDescending(e => e.CreatedAt)
+                .Select(e => new EmployeeViewModel
                 {
-                    ID = s.ID,
-                    EmployeeNumber = s.EmployeeNumber,
-                    Name = s.Name,
-                    AccessLevel = s.AccessLevel,
-                    Username = s.Username
+                    ID = e.ID,
+                    EmployeeNumber = e.EmployeeNumber,
+                    Name = e.Name,
+                    AccessLevel = e.AccessLevel,
+                    Username = e.Username
                 })
                 .ToPagedListAsync(pageNumber, 15);
 
-            if (staffs.PageNumber != 1 && pageNumber > staffs.PageCount)
+            if (employees.PageNumber != 1 && pageNumber > employees.PageCount)
             {
                 return NotFound();
             }
 
-            return View(staffs);
+            return View(employees);
         }
 
         [HttpGet]
@@ -63,21 +63,21 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var staff = await _context.Employees.FirstOrDefaultAsync(s => s.ID == id);
-            if (staff == null)
+            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ID == id);
+            if (employee == null)
             {
                 return NotFound();
             }
 
             var item = new EmployeeViewModel
             {
-                ID = staff.ID,
-                EmployeeNumber = staff.EmployeeNumber,
-                Name = staff.Name,
-                AccessLevel = staff.AccessLevel,
-                Username = staff.Username,
-                CreatedAt = staff.CreatedAt,
-                UpdatedAt = staff.UpdatedAt
+                ID = employee.ID,
+                EmployeeNumber = employee.EmployeeNumber,
+                Name = employee.Name,
+                AccessLevel = employee.AccessLevel,
+                Username = employee.Username,
+                CreatedAt = employee.CreatedAt,
+                UpdatedAt = employee.UpdatedAt
             };
 
             return View(item);
@@ -99,7 +99,7 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var staff = new Employee
+                    var employee = new Employee
                     {
                         EmployeeNumber = item.EmployeeNumber,
                         Name = item.Name,
@@ -107,10 +107,10 @@ namespace ELibrary.Controllers
                         Username = item.Username,
                         Password = BC.HashPassword(item.Password)
                     };
-                    _context.Add(staff);
+                    _context.Add(employee);
                     await _context.SaveChangesAsync();
 
-                    TempData["Message"] = "The staff has been created.";
+                    TempData["Message"] = "The employee has been created.";
 
                     return RedirectToAction(nameof(Index));
                 }
@@ -133,19 +133,19 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var staff = await _context.Employees.FirstOrDefaultAsync(s => s.ID == id);
-            if (staff == null)
+            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ID == id);
+            if (employee == null)
             {
                 return NotFound();
             }
 
             var item = new EmployeeEditViewModel
             {
-                ID = staff.ID,
-                EmployeeNumber = staff.EmployeeNumber,
-                Name = staff.Name,
-                AccessLevel = staff.AccessLevel,
-                Username = staff.Username
+                ID = employee.ID,
+                EmployeeNumber = employee.EmployeeNumber,
+                Name = employee.Name,
+                AccessLevel = employee.AccessLevel,
+                Username = employee.Username
             };
 
             return View(item);
@@ -167,26 +167,26 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var staff = await _context.Employees.FirstOrDefaultAsync(s => s.ID == id);
-                    if (staff == null)
+                    var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ID == id);
+                    if (employee == null)
                     {
                         return NotFound();
                     }
                     
-                    staff.EmployeeNumber = item.EmployeeNumber;
-                    staff.Name = item.Name;
-                    staff.AccessLevel = item.AccessLevel;
-                    staff.UpdatedAt = DateTime.UtcNow;
+                    employee.EmployeeNumber = item.EmployeeNumber;
+                    employee.Name = item.Name;
+                    employee.AccessLevel = item.AccessLevel;
+                    employee.UpdatedAt = DateTime.UtcNow;
 
                     if (!string.IsNullOrEmpty(item.Password))
                     {
-                        staff.Password = BC.HashPassword(item.Password);
+                        employee.Password = BC.HashPassword(item.Password);
                     }
 
-                    _context.Update(staff);
+                    _context.Update(employee);
                     await _context.SaveChangesAsync();
 
-                    TempData["Message"] = "The staff has been updated.";
+                    TempData["Message"] = "The employee has been updated.";
 
                     return RedirectToAction(nameof(Index));
                 }
@@ -205,15 +205,15 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var staff = await _context.Employees.FirstOrDefaultAsync(s => s.ID == id);
-            if (staff != null)
+            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ID == id);
+            if (employee != null)
             {
-                _context.Remove(staff);
+                _context.Remove(employee);
             }
 
             await _context.SaveChangesAsync();
 
-            TempData["Message"] = "The staff has been deleted.";
+            TempData["Message"] = "The employee has been deleted.";
 
             return RedirectToAction(nameof(Index));
         }

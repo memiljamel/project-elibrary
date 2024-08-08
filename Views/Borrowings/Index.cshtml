@@ -1,7 +1,7 @@
-﻿@model IPagedList<ELibrary.ViewModels.AuthorViewModel>
+﻿@model IPagedList<ELibrary.ViewModels.BorrowingViewModel>
 
 @{
-	ViewData["Title"] = "Authors";
+	ViewData["Title"] = "Borrowings";
 }
 
 <div class="flex flex-col w-full h-full p-0 m-0 relative">
@@ -24,7 +24,7 @@
 
 					<li class="inline-block w-auto h-auto p-0 m-0 relative [&+li::before]:content-['/'] [&+li::before]:mx-1 [&+li::before]:text-black/[0.60] dark:[&+li::before]:text-white/[0.60]">
 						<span class="inline-block w-auto h-auto p-0 m-0 subtitle-1 text-black/[0.60] cursor-default dark:text-white/[0.60]">
-							@Html.Raw("Authors")
+							@Html.Raw("Borrowings")
 						</span>
 					</li>
 				</ol>
@@ -51,13 +51,13 @@
 						<div class="flex-1 block w-auto h-auto p-0 m-0 overflow-hidden relative basis-auto order-1 sm:order-none">
 							<div class="block w-full h-auto p-0 m-0 relative">
 								<h6 class="block w-full h-auto px-2 py-1.5 m-0 headline-6 text-black/[0.87] truncate dark:text-white/[0.87]">
-									@Html.Raw("All Authors")
+									@Html.Raw("All Borrowings")
 								</h6>
 							</div>
 						</div>
 
 						<div class="block w-auto h-auto p-0 mx-2 mt-2 overflow-hidden relative basis-full order-3 sm:basis-auto sm:order-none">
-							<form class="block w-auto h-auto p-0 m-0 relative" asp-controller="Authors" asp-action="Index" method="GET" autocomplete="off" autocapitalize="off">
+							<form class="block w-auto h-auto p-0 m-0 relative" asp-controller="Borrowings" asp-action="Index" method="GET" autocomplete="off" autocapitalize="off">
 
 								@* Search *@
 								<div class="block w-full h-auto p-0 m-0 relative" data-te-input-wrapper-init>
@@ -80,7 +80,7 @@
 								
 								@* Icon Link *@
 								<div class="block w-auto h-auto p-0 m-0 relative">
-									<a class="block w-10 h-10 p-2 m-0 bg-transparent rounded-full text-black/[0.60] outline-none cursor-pointer align-middle transition duration-150 ease-in-out hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Authors" asp-action="Create" data-te-toggle="tooltip" title="Create">
+									<a class="block w-10 h-10 p-2 m-0 bg-transparent rounded-full text-black/[0.60] outline-none cursor-pointer align-middle transition duration-150 ease-in-out hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Borrowings" asp-action="Create" data-te-toggle="tooltip" title="Create">
 										<svg class="pointer-events-none w-full h-full fill-current" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
 											<path d="M0 0h24v24H0z" fill="none" />
 											<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
@@ -154,13 +154,16 @@
 									<thead class="table-header-group border-b border-solid border-chinese-white dark:border-dark-liver">
 										<tr class="table-row text-inherit align-middle outline-none relative">
 											<th class="table-cell w-auto h-14 px-4 m-0 subtitle-2 text-black/[0.87] text-left truncate dark:text-white/[0.87]">
-												@Html.DisplayNameFor(model => model[0].Name)
+												@Html.DisplayNameFor(model => model[0].MemberNumber)
 											</th>
 											<th class="table-cell w-auto h-14 px-4 m-0 subtitle-2 text-black/[0.87] text-left truncate dark:text-white/[0.87]">
-												@Html.DisplayNameFor(model => model[0].Email)
+												@Html.DisplayNameFor(model => model[0].BookTitle)
 											</th>
-											<th class="table-cell w-auto h-14 px-4 m-0 subtitle-2 text-black/[0.87] text-right truncate dark:text-white/[0.87]">
-												@Html.DisplayNameFor(model => model[0].BookCount)
+											<th class="table-cell w-auto h-14 px-4 m-0 subtitle-2 text-black/[0.87] text-left truncate dark:text-white/[0.87]">
+												@Html.DisplayNameFor(model => model[0].DateBorrow)
+											</th>
+											<th class="table-cell w-auto h-14 px-4 m-0 subtitle-2 text-black/[0.87] text-left truncate dark:text-white/[0.87]">
+												@Html.DisplayNameFor(model => model[0].DateReturn)
 											</th>
 											<th class="table-cell w-auto h-14 px-4 m-0 subtitle-2 text-black/[0.87] text-center truncate dark:text-white/[0.87]">
 												@Html.Raw("Action")
@@ -175,16 +178,19 @@
 											{
 												<tr class="table-row text-inherit align-middle outline-none relative">
 													<td class="table-cell w-auto h-[52px] px-4 m-0 body-2 text-black/[0.87] text-left truncate dark:text-white/[0.87]">
-														@Html.DisplayFor(modelItem => item.Name)
+														@Html.DisplayFor(modelItem => item.MemberNumber)
 													</td>
 													<td class="table-cell w-auto h-[52px] px-4 m-0 body-2 text-black/[0.87] text-left truncate dark:text-white/[0.87]">
-														@Html.DisplayFor(modelItem => item.Email)
+														@Html.DisplayFor(modelItem => item.BookTitle)
 													</td>
-													<td class="table-cell w-auto h-[52px] px-4 m-0 body-2 text-black/[0.87] text-right truncate dark:text-white/[0.87]">
-														@Html.DisplayFor(modelItem => item.BookCount)
+													<td class="table-cell w-auto h-[52px] px-4 m-0 body-2 text-black/[0.87] text-left truncate dark:text-white/[0.87]">
+														@Html.DisplayFor(modelItem => item.DateBorrow)
+													</td>
+													<td class="table-cell w-auto h-[52px] px-4 m-0 body-2 text-black/[0.87] text-left truncate dark:text-white/[0.87]">
+														@Html.DisplayFor(modelItem => item.DateReturn)
 													</td>
 													<td class="table-cell w-auto h-[52px] px-4 m-0 body-2 text-black/[0.87] text-center truncate dark:text-white/[0.87]">
-														<form class="inline-block w-auto h-auto p-0 m-0 relative" asp-controller="Authors" asp-action="Delete" asp-route-id="@item.ID" method="POST">
+														<form class="inline-block w-auto h-auto p-0 m-0 relative" asp-controller="Borrowings" asp-action="Delete" asp-route-id="@item.ID" method="POST">
 													
 															@* Dropdown *@
 															<div class="block w-auto h-auto p-0 m-0 relative" data-te-dropdown-ref>
@@ -197,7 +203,7 @@
 																
 																<ul class="hidden min-w-[128px] w-auto max-w-[280px] h-auto py-2 m-0 list-none rounded bg-white shadow-08dp absolute top-full right-0 z-10 [&[data-te-dropdown-show]]:block dark:bg-charleston-green" data-te-dropdown-menu-ref>
 																	<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
-																		<a class="flex justify-between items-center gap-4 w-full h-10 py-2 px-4 m-0 body-2 text-black/[0.60] no-underline outline-none truncate select-none hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Authors" asp-action="Details" asp-route-id="@item.ID" data-te-dropdown-item-ref>
+																		<a class="flex justify-between items-center gap-4 w-full h-10 py-2 px-4 m-0 body-2 text-black/[0.60] no-underline outline-none truncate select-none hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Borrowings" asp-action="Details" asp-route-id="@item.ID" data-te-dropdown-item-ref>
 																			<div class="inline-block w-auto h-auto p-0 m-0 relative">
 																				<svg class="pointer-events-none w-full h-full fill-current" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
 																					<path d="M0 0h24v24H0z" fill="none" />
@@ -214,7 +220,7 @@
 																	</li>
 																	
 																	<li class="block w-full h-auto p-0 m-0 overflow-hidden relative">
-																		<a class="flex justify-between items-center gap-4 w-full h-10 py-2 px-4 m-0 body-2 text-black/[0.60] no-underline outline-none truncate select-none hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Authors" asp-action="Edit" asp-route-id="@item.ID" data-te-dropdown-item-ref>
+																		<a class="flex justify-between items-center gap-4 w-full h-10 py-2 px-4 m-0 body-2 text-black/[0.60] no-underline outline-none truncate select-none hover:bg-black/[0.04] active:bg-black/[0.10] focus:bg-black/[0.12] dark:text-white/[0.60] dark:hover:bg-white/[0.04] dark:active:bg-white/[0.10] dark:focus:bg-white/[0.12]" asp-controller="Borrowings" asp-action="Edit" asp-route-id="@item.ID" data-te-dropdown-item-ref>
 																			<div class="inline-block w-auto h-auto p-0 m-0 relative">
 																				<svg class="pointer-events-none w-full h-full fill-current" xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 0 24 24" width="24px" fill="#000000">
 			                                                                        <path d="M0 0h24v24H0z" fill="none" />
@@ -258,7 +264,7 @@
 										else
 										{
 											<tr class="table-row text-inherit align-middle outline-none relative">
-												<td class="table-cell w-auto h-[52px] px-4 m-0 body-2 text-black/[0.87] text-center truncate dark:text-white/[0.87]" colspan="4">
+												<td class="table-cell w-auto h-[52px] px-4 m-0 body-2 text-black/[0.87] text-center truncate dark:text-white/[0.87]" colspan="5">
 													@Html.Raw("No data available.")
 												</td>
 											</tr>

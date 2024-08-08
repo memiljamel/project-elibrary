@@ -95,11 +95,7 @@ namespace ELibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            var authors = await _context.Authors
-                .OrderBy(a => a.Name)
-                .ToListAsync();
-            
-            ViewBag.Authors = new SelectList(authors, "ID", "Name");
+            ViewBag.Authors = new SelectList(await _context.Authors.ToListAsync(), "ID", "Name");
             
             return View();
         }
@@ -107,14 +103,10 @@ namespace ELibrary.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("ID,Cover,ISBN,Title,AuthorIDs,Category,Publisher,Quantity")] 
+            [Bind("ID,Title,AuthorIDs,Category,Publisher,Quantity")] 
             BookFormViewModel item)
         {
-            var authors = await _context.Authors
-                .OrderBy(a => a.Name)
-                .ToListAsync();
-            
-            ViewBag.Authors = new SelectList(authors, "ID", "Name");
+            ViewBag.Authors = new SelectList(await _context.Authors.ToListAsync(), "ID", "Name");
             
             if (ModelState.IsValid)
             {
@@ -159,11 +151,7 @@ namespace ELibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(Guid? id)
         {
-            var authors = await _context.Authors
-                .OrderBy(a => a.Name)
-                .ToListAsync();
-            
-            ViewBag.Authors = new SelectList(authors, "ID", "Name");
+            ViewBag.Authors = new SelectList(await _context.Authors.ToListAsync(), "ID", "Name");
             
             if (id == null)
             {
@@ -196,14 +184,10 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             Guid id,
-            [Bind("ID,Cover,ISBN,Title,AuthorIDs,Category,Publisher,Quantity")]
+            [Bind("ID,Title,AuthorIDs,Category,Publisher,Quantity")]
             BookFormViewModel item)
         {
-            var authors = await _context.Authors
-                .OrderBy(a => a.Name)
-                .ToListAsync();
-            
-            ViewBag.Authors = new SelectList(authors, "ID", "Name");
+            ViewBag.Authors = new SelectList(await _context.Authors.ToListAsync(), "ID", "Name");
             
             if (id != item.ID)
             {

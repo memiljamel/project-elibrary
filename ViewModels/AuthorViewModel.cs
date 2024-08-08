@@ -8,7 +8,7 @@ namespace ELibrary.ViewModels
         
         public string Name { get; set; }
         
-        [DisplayFormat(NullDisplayText = "No email")]
+        [DisplayFormat(NullDisplayText = "No Email")]
         public string? Email { get; set; }
         
         [Display(Name = "Total Books")]
