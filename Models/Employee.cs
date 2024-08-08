@@ -12,8 +12,7 @@ namespace ELibrary.Models
     }
     
     [Table("employees")]
-    [Index(nameof(Username), IsUnique = true)]
-    [Index(nameof(EmployeeNumber), IsUnique = true)]
+    [Index(nameof(Username), nameof(EmployeeNumber), IsUnique = true)]
     public class Employee : BaseEntity
     {
         [Required]
