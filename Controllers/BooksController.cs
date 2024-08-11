@@ -1,6 +1,7 @@
 using ELibrary.Data;
 using ELibrary.Models;
 using ELibrary.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -8,6 +9,7 @@ using X.PagedList.EF;
 
 namespace ELibrary.Controllers
 {
+    [Authorize]
     public class BooksController : Controller
     {
         private readonly ELibraryContext _context;
@@ -69,9 +71,9 @@ namespace ELibrary.Controllers
             }
 
             var book = await _context.Books
-                .Include(ba => ba.BooksAuthors)
-                .ThenInclude(a => a.Author)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .Include(b => b.BooksAuthors)
+                .ThenInclude(ba => ba.Author)
+                .FirstOrDefaultAsync(b => b.ID == id);
             if (book == null)
             {
                 return NotFound();
@@ -159,9 +161,9 @@ namespace ELibrary.Controllers
             }
             
             var book = await _context.Books
-                .Include(ba => ba.BooksAuthors)
-                .ThenInclude(a => a.Author)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .Include(b => b.BooksAuthors)
+                .ThenInclude(ba => ba.Author)
+                .FirstOrDefaultAsync(b => b.ID == id);
             if (book == null)
             {
                 return NotFound();
@@ -199,9 +201,9 @@ namespace ELibrary.Controllers
                 try
                 {
                     var book = await _context.Books
-                        .Include(ba => ba.BooksAuthors)
-                        .ThenInclude(a => a.Author)
-                        .FirstOrDefaultAsync(m => m.ID == id);
+                        .Include(b => b.BooksAuthors)
+                        .ThenInclude(ba => ba.Author)
+                        .FirstOrDefaultAsync(b => b.ID == id);
                     if (book == null)
                     {
                         return NotFound();
@@ -249,9 +251,9 @@ namespace ELibrary.Controllers
         public async Task<IActionResult> Delete(Guid id)
         {
             var book = await _context.Books
-                .Include(ba => ba.BooksAuthors)
-                .ThenInclude(a => a.Author)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .Include(b => b.BooksAuthors)
+                .ThenInclude(ba => ba.Author)
+                .FirstOrDefaultAsync(b => b.ID == id);
             if (book != null)
             {
                 book.BooksAuthors.Clear();

@@ -1,6 +1,7 @@
 using ELibrary.Data;
 using ELibrary.Models;
 using ELibrary.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -9,6 +10,7 @@ using X.PagedList.EF;
 
 namespace ELibrary.Controllers
 {
+    [Authorize]
     public class BorrowingsController : Controller
     {
         private readonly ELibraryContext _context;
@@ -71,7 +73,7 @@ namespace ELibrary.Controllers
             var borrowing = await _context.Borrowings
                 .Include(b => b.Member)
                 .Include(b => b.Book)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .FirstOrDefaultAsync(b => b.ID == id);
             if (borrowing == null)
             {
                 return NotFound();
@@ -153,7 +155,7 @@ namespace ELibrary.Controllers
             var borrowing = await _context.Borrowings
                 .Include(b => b.Member)
                 .Include(b => b.Book)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .FirstOrDefaultAsync(b => b.ID == id);
             if (borrowing == null)
             {
                 return NotFound();
@@ -194,7 +196,7 @@ namespace ELibrary.Controllers
                     var borrowing = await _context.Borrowings
                         .Include(b => b.Member)
                         .Include(b => b.Book)
-                        .FirstOrDefaultAsync(m => m.ID == id);
+                        .FirstOrDefaultAsync(b => b.ID == id);
                     if (borrowing == null)
                     {
                         return NotFound();
@@ -232,7 +234,7 @@ namespace ELibrary.Controllers
             var borrowing = await _context.Borrowings
                 .Include(b => b.Member)
                 .Include(b => b.Book)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .FirstOrDefaultAsync(b => b.ID == id);
             if (borrowing != null)
             {
                 if (borrowing.DateReturn == null)

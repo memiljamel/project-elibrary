@@ -1,12 +1,14 @@
 using ELibrary.Data;
 using ELibrary.Models;
 using ELibrary.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList.EF;
 
 namespace ELibrary.Controllers
 {
+    [Authorize]
     public class MembersController : Controller
     {
         private readonly ELibraryContext _context;
@@ -64,7 +66,7 @@ namespace ELibrary.Controllers
 
             var member = await _context.Members
                 .Include(m => m.Phones)
-                .FirstOrDefaultAsync(s => s.ID == id);
+                .FirstOrDefaultAsync(m => m.ID == id);
             if (member == null)
             {
                 return NotFound();

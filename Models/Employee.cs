@@ -6,8 +6,7 @@ namespace ELibrary.Models
 {
     public enum AccessLevel
     {
-        [Display(Name = "Administrator")]
-        Admin,
+        Administrator,
         Staff
     }
     

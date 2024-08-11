@@ -1,6 +1,7 @@
 using ELibrary.Data;
 using ELibrary.Models;
 using ELibrary.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList.EF;
@@ -8,6 +9,7 @@ using BC = BCrypt.Net.BCrypt;
 
 namespace ELibrary.Controllers
 {
+    [Authorize]
     public class EmployeesController : Controller
     {
         private readonly ELibraryContext _context;
@@ -84,6 +86,7 @@ namespace ELibrary.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Administrator")]
         public IActionResult Create()
         {
             return View();
@@ -91,6 +94,7 @@ namespace ELibrary.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Create(
             [Bind("Name,EmployeeNumber,AccessLevel,Username,Password,PasswordConfirmation")]
             EmployeeCreateViewModel item)
@@ -126,6 +130,7 @@ namespace ELibrary.Controllers
         }
 
         [HttpGet]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(Guid? id)
         {
             if (id == null)
@@ -153,6 +158,7 @@ namespace ELibrary.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(
             Guid id,
             [Bind("ID,Name,EmployeeNumber,AccessLevel,Username,Password,PasswordConfirmation")]
@@ -203,6 +209,7 @@ namespace ELibrary.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Delete(Guid id)
         {
             var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ID == id);
