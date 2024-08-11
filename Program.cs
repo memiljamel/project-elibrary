@@ -1,4 +1,5 @@
 using ELibrary.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Vite.AspNetCore;
 
@@ -19,6 +20,14 @@ else
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddViteServices();
+builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+	.AddCookie(options =>
+	{
+		options.LoginPath = "/Account/Login";
+		options.LogoutPath = "/Account/Logout";
+		options.AccessDeniedPath = "/Account/AccessDenied";
+		options.ReturnUrlParameter = "ReturnUrl";
+	});
 
 var app = builder.Build();
 
@@ -35,6 +44,7 @@ app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(

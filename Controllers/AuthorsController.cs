@@ -1,12 +1,14 @@
 using ELibrary.Data;
 using ELibrary.Models;
 using ELibrary.ViewModels;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using X.PagedList.EF;
 
 namespace ELibrary.Controllers
 {
+    [Authorize]
     public class AuthorsController : Controller
     {
         private readonly ELibraryContext _context;
@@ -32,11 +34,11 @@ namespace ELibrary.Controllers
             
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(s => s.Name.ToLower().Contains(search.ToLower()) ||
-                                         s.Email.ToLower().Contains(search.ToLower()));
+                query = query.Where(a => a.Name.ToLower().Contains(search.ToLower()) ||
+                                         a.Email.ToLower().Contains(search.ToLower()));
             }
 
-            var authors = await query.OrderByDescending(s => s.CreatedAt)
+            var authors = await query.OrderByDescending(a => a.CreatedAt)
                 .Select(a => new AuthorViewModel
                 {
                     ID = a.ID,
@@ -64,7 +66,7 @@ namespace ELibrary.Controllers
 
             var author = await _context.Authors
                 .Include(a => a.BooksAuthors)
-                .FirstOrDefaultAsync(m => m.ID == id);
+                .FirstOrDefaultAsync(a => a.ID == id);
             if (author == null)
             {
                 return NotFound();
@@ -129,7 +131,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var author = await _context.Authors.FirstOrDefaultAsync(s => s.ID == id);
+            var author = await _context.Authors.FirstOrDefaultAsync(a => a.ID == id);
             if (author == null)
             {
                 return NotFound();
@@ -160,7 +162,7 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var author = await _context.Authors.FirstOrDefaultAsync(s => s.ID == id);
+                    var author = await _context.Authors.FirstOrDefaultAsync(a => a.ID == id);
                     if (author == null)
                     {
                         return NotFound();
@@ -191,7 +193,7 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var author = await _context.Authors.FirstOrDefaultAsync(s => s.ID == id);
+            var author = await _context.Authors.FirstOrDefaultAsync(a => a.ID == id);
             if (author != null)
             {
                 _context.Authors.Remove(author);
