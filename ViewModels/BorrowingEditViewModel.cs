@@ -10,24 +10,25 @@ namespace ELibrary.ViewModels
         [HiddenInput]
         public Guid ID { get; set; }
         
-        [Display(Name = "Member Number")]
         [Required]
+        [Display(Name = "Member Number")]
         public Guid MemberID { get; set; }
         
         [ValidateNever]
+        [DataType(DataType.Text)]
         public string MemberNumber { get; set; }
         
-        [Display(Name = "Title")]
         [Required]
+        [Display(Name = "Title")]
         public Guid BookID { get; set; }
 
-        [Display(Name = "Date Borrow")]
         [ValidateNever]
         [DataType(DataType.Date)]
+        [Display(Name = "Date Borrow")]
         public DateOnly DateBorrow { get; set; }
         
-        [Display(Name = "Date Return")]
         [DataType(DataType.Date)]
+        [Display(Name = "Date Return")]
         public DateOnly? DateReturn { get; set; }
     }
 }

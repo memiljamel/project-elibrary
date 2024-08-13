@@ -11,30 +11,33 @@ namespace ELibrary.ViewModels
         [HiddenInput]
         public Guid ID { get; set; }
         
-        [Display(Name = "Employee Number")]
         [Required]
         [StringLength(16, MinimumLength = 8)]
+        [DataType(DataType.Text)]
+        [Display(Name = "Employee Number")]
         public string EmployeeNumber { get; set; }
         
         [Required]
         [StringLength(100)]
+        [DataType(DataType.Text)]
         public string Name { get; set; }
         
-        [Display(Name = "Role")]
         [Required]
         [EnumDataType(typeof(AccessLevel))]
+        [Display(Name = "Role")]
         public AccessLevel AccessLevel { get; set; }
         
         [ValidateNever]
+        [DataType(DataType.Text)]
         public string Username { get; set; }
         
         [StringLength(256)]
         [DataType(DataType.Password)]
         public string? Password { get; set; }
         
-        [Display(Name = "Password Confirmation")]
-        [DataType(DataType.Password)]
         [Compare(nameof(Password))]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password Confirmation")]
         public string? PasswordConfirmation { get; set; }
     }
 }

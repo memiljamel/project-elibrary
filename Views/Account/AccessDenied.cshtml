@@ -2,4 +2,16 @@
     ViewData["Title"] = "Access Denied";
 }
 
-<h1>Access Denied</h1>
+<div class="relative flex items-top justify-center min-h-screen bg-anti-flash-white dark:bg-chinese-black sm:items-center sm:pt-0">
+    <div class="max-w-xl mx-auto sm:px-6 lg:px-8">
+        <div class="flex items-center pt-8 sm:justify-start sm:pt-0">
+            <div class="px-4 text-lg text-black/[0.60] border-r border-black/[0.38] tracking-wider dark:text-white/[0.60] dark:border-white/[0.38]">
+                @Html.Raw("403") 
+            </div>
+
+            <div class="ml-4 text-lg text-black/[0.60] uppercase tracking-wider dark:text-white/[0.60]">
+                @Html.Raw("Access Denied")
+            </div>
+        </div>
+    </div>
+</div>

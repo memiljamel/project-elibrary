@@ -11,6 +11,7 @@ namespace ELibrary.ViewModels
         
         [Required]
         [StringLength(100)]
+        [DataType(DataType.Text)]
         public string Name { get; set; }
         
         [EmailAddress]

@@ -5,6 +5,7 @@ export default {
         './Assets/**/*.{js,ts}',
         './Views/**/*.{cshtml,razor}',
         './Pages/**/*.{cshtml,razor}',
+        './node_modules/tw-elements/dist/js/**/*.js',
     ],
     theme: {
         extend: {
