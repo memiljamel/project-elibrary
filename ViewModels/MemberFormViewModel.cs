@@ -9,13 +9,15 @@ namespace ELibrary.ViewModels
         [HiddenInput]
         public Guid ID { get; set; }
         
-        [Display(Name = "Member Number")]
         [Required]
         [StringLength(16, MinimumLength = 8)]
+        [DataType(DataType.Text)]
+        [Display(Name = "Member Number")]
         public string MemberNumber { get; set; }
         
         [Required]
         [StringLength(100)]
+        [DataType(DataType.Text)]
         public string Name { get; set; }
         
         [Required]
@@ -24,10 +26,10 @@ namespace ELibrary.ViewModels
         [DataType(DataType.EmailAddress)]
         public string Email { get; set; }
         
-        [Display(Name = "Phone Numbers")]
         [Required]
         [StringLength(256)]
         [DataType(DataType.PhoneNumber)]
+        [Display(Name = "Phone Numbers")]
         public string PhoneNumbers { get; set; }
         
         [Required]

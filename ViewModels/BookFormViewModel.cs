@@ -12,10 +12,11 @@ namespace ELibrary.ViewModels
         
         [Required]
         [StringLength(100)]
+        [DataType(DataType.Text)]
         public string Title { get; set; }
         
-        [Display(Name = "Authors")]
         [Required]
+        [Display(Name = "Authors")]
         public IEnumerable<Guid> AuthorIDs { get; set; }
         
         [Required]
@@ -24,9 +25,11 @@ namespace ELibrary.ViewModels
         
         [Required]
         [StringLength(100)]
+        [DataType(DataType.Text)]
         public string Publisher { get; set; }
         
         [Required]
+        [Range(1, 100)]
         public int Quantity { get; set; }
     }
 }

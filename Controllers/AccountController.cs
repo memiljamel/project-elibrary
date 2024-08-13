@@ -1,6 +1,5 @@
 using System.Security.Claims;
 using ELibrary.Data;
-using ELibrary.Models;
 using ELibrary.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -61,7 +60,7 @@ namespace ELibrary.Controllers
                 {
                     AllowRefresh = true,
                     ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
-                    IsPersistent = item.IsRemembered,
+                    IsPersistent = item.RememberMe,
                     IssuedUtc = DateTimeOffset.UtcNow,
                     RedirectUri = "/Home/Index"
                 };
@@ -161,13 +160,6 @@ namespace ELibrary.Controllers
             }
             
             return View(item);
-        }
-        
-        [HttpGet]
-        [AllowAnonymous]
-        public IActionResult AccessDenied()
-        {
-            return View();
         }
     }
 }

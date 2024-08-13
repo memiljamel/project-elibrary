@@ -15,8 +15,8 @@ namespace ELibrary.ViewModels
         [Display(Name = "Date Borrow")]
         public DateOnly DateBorrow { get; set; }
         
-        [Display(Name = "Date Return")]
         [DisplayFormat(NullDisplayText = "Not Returned")]
+        [Display(Name = "Date Return")]
         public DateOnly? DateReturn { get; set; }
         
         [Display(Name = "Created At")]

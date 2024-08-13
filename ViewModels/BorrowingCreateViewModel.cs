@@ -4,17 +4,17 @@ namespace ELibrary.ViewModels
 {
     public class BorrowingCreateViewModel
     {
-        [Display(Name = "Member Number")]
         [Required]
+        [Display(Name = "Member Number")]
         public Guid MemberID { get; set; }
         
-        [Display(Name = "Title")]
         [Required]
+        [Display(Name = "Title")]
         public Guid BookID { get; set; }
 
-        [Display(Name = "Date Borrow")]
         [Required]
         [DataType(DataType.Date)]
+        [Display(Name = "Date Borrow")]
         public DateOnly DateBorrow { get; set; }
     }
 }
