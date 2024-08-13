@@ -25,6 +25,11 @@ namespace ELibrary.Controllers
         public IActionResult Login(string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
+
+            if (User.Identity.IsAuthenticated)
+            {
+                return RedirectToAction(nameof(HomeController.Index), "Home");
+            }
             
             return View();
         }
