@@ -1,21 +1,21 @@
-using ELibrary.Data;
 using ELibrary.Models;
+using ELibrary.Repositories;
 using ELibrary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using X.PagedList.EF;
+using X.PagedList.Extensions;
 
 namespace ELibrary.Controllers
 {
     [Authorize]
     public class MembersController : Controller
     {
-        private readonly ELibraryContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public MembersController(ELibraryContext context)
+        public MembersController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -28,32 +28,24 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var query = _context.Members
-                .Include(m => m.Phones)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
+            var members = await _unitOfWork.MemberRepository.GetPagedMembersWithPhones(search, pageNumber);
+            
+            if (members.PageNumber != 1 && pageNumber > members.PageCount)
             {
-                query = query.Where(m => m.MemberNumber.ToLower().Contains(search.ToLower()) ||
-                                         m.Name.ToLower().Contains(search.ToLower()) ||
-                                         m.Email.ToLower().Contains(search.ToLower()) ||
-                                         m.Phones.Any(p => p.PhoneNumber.Contains(search)) ||
-                                         m.Address.ToLower().Contains(search.ToLower()));
+                return NotFound();
             }
+            
+            var items = members.Select(m => new MemberViewModel
+            {
+                ID = m.ID,
+                MemberNumber = m.MemberNumber,
+                Name = m.Name,
+                Email = m.Email,
+                PhoneNumbers = string.Join(", ", m.Phones.Select(p => p.PhoneNumber)),
+                Address = m.Address
+            });
 
-            var members = await query.OrderByDescending(m => m.CreatedAt)
-                .Select(m => new MemberViewModel
-                {
-                    ID = m.ID,
-                    MemberNumber = m.MemberNumber,
-                    Name = m.Name,
-                    Email = m.Email,
-                    PhoneNumbers = string.Join(", ", m.Phones.Select(p => p.PhoneNumber)),
-                    Address = m.Address
-                })
-                .ToPagedListAsync(pageNumber, 15);
-
-            return View(members);
+            return View(items);
         }
 
         [HttpGet]
@@ -64,9 +56,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var member = await _context.Members
-                .Include(m => m.Phones)
-                .FirstOrDefaultAsync(m => m.ID == id);
+            var member = await _unitOfWork.MemberRepository.GetMemberWithPhonesById(id);
             if (member == null)
             {
                 return NotFound();
@@ -108,13 +98,25 @@ namespace ELibrary.Controllers
                         MemberNumber = item.MemberNumber,
                         Name = item.Name,
                         Email = item.Email,
-                        Phones = item.PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
-                            .Select(p => new Phone { PhoneNumber = p.Trim() })
-                            .ToList(),
                         Address = item.Address
                     };
-                    _context.Add(member);
-                    await _context.SaveChangesAsync();
+                    _unitOfWork.MemberRepository.Add(member);
+
+                    var phoneNumbers = item.PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
+                        .Select(p => p.Trim())
+                        .ToList();
+                    
+                    foreach (var phoneNumber in phoneNumbers)
+                    {
+                        var phone = new Phone
+                        {
+                            PhoneNumber = phoneNumber,
+                            MemberID = member.ID
+                        };
+                        _unitOfWork.PhoneRepository.Add(phone);
+                    }
+                    
+                    await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The member has been created.";
 
@@ -139,9 +141,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var member = await _context.Members
-                .Include(m => m.Phones)
-                .FirstOrDefaultAsync(m => m.ID == id);
+            var member = await _unitOfWork.MemberRepository.GetMemberWithPhonesById(id);
             if (member == null)
             {
                 return NotFound();
@@ -176,26 +176,32 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var member = await _context.Members
-                        .Include(m => m.Phones)
-                        .FirstOrDefaultAsync(m => m.ID == id);
-                    if (member == null)
-                    {
-                        return NotFound();
-                    }
+                    var member = await _unitOfWork.MemberRepository.GetMemberWithPhonesById(id);
+                    
+                    _unitOfWork.PhoneRepository.RemoveRange(member.Phones);
                     
                     member.MemberNumber = item.MemberNumber;
                     member.Name = item.Name;
                     member.Email = item.Email;
                     member.Address = item.Address;
                     member.UpdatedAt = DateTime.UtcNow;
-
-                    member.Phones.Clear();
-                    member.Phones = item.PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
-                        .Select(p => new Phone { PhoneNumber = p.Trim() })
+                    _unitOfWork.MemberRepository.Update(member);
+                    
+                    var phoneNumbers = item.PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
+                        .Select(p => p.Trim())
                         .ToList();
-                    _context.Update(member);
-                    await _context.SaveChangesAsync();
+
+                    foreach (var phoneNumber in phoneNumbers)
+                    {
+                        var phone = new Phone
+                        {
+                            PhoneNumber = phoneNumber,
+                            MemberID = member.ID
+                        };
+                        _unitOfWork.PhoneRepository.Add(phone);
+                    }
+                    
+                    await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The member has been updated.";
 
@@ -216,16 +222,14 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var member = await _context.Members
-                .Include(m => m.Phones)
-                .FirstOrDefaultAsync(m => m.ID == id);
+            var member = await _unitOfWork.MemberRepository.GetMemberWithPhonesById(id);
             if (member != null)
             {
-                member.Phones.Clear();
-                _context.Remove(member);
+                _unitOfWork.PhoneRepository.RemoveRange(member.Phones);
+                _unitOfWork.MemberRepository.Remove(member);
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             TempData["Message"] = "The member has been deleted.";
 

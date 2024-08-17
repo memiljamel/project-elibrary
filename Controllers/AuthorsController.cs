@@ -1,21 +1,21 @@
-using ELibrary.Data;
 using ELibrary.Models;
+using ELibrary.Repositories;
 using ELibrary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using X.PagedList.EF;
+using X.PagedList.Extensions;
 
 namespace ELibrary.Controllers
 {
     [Authorize]
     public class AuthorsController : Controller
     {
-        private readonly ELibraryContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AuthorsController(ELibraryContext context)
+        public AuthorsController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -27,33 +27,23 @@ namespace ELibrary.Controllers
             {
                 return NotFound();
             }
-
-            var query = _context.Authors
-                .Include(a => a.BooksAuthors)
-                .AsQueryable();
             
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(a => a.Name.ToLower().Contains(search.ToLower()) ||
-                                         a.Email.ToLower().Contains(search.ToLower()));
-            }
-
-            var authors = await query.OrderByDescending(a => a.CreatedAt)
-                .Select(a => new AuthorViewModel
-                {
-                    ID = a.ID,
-                    Name = a.Name,
-                    Email = a.Email,
-                    BookCount = a.BooksAuthors.Count
-                })
-                .ToPagedListAsync(pageNumber, 15);
+            var authors = await _unitOfWork.AuthorRepository.GetPagedAuthors(search, pageNumber);
             
             if (authors.PageNumber != 1 && pageNumber > authors.PageCount)
             {
                 return NotFound();
             }
+
+            var items = authors.Select(a => new AuthorViewModel
+            {
+                ID = a.ID,
+                Name = a.Name,
+                Email = a.Email,
+                BookCount = a.BooksAuthors.Count
+            });
             
-            return View(authors);
+            return View(items);
         }
 
         [HttpGet]
@@ -64,9 +54,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var author = await _context.Authors
-                .Include(a => a.BooksAuthors)
-                .FirstOrDefaultAsync(a => a.ID == id);
+            var author = await _unitOfWork.AuthorRepository.GetAuthorWithBooksAuthorsById(id);
             if (author == null)
             {
                 return NotFound();
@@ -105,8 +93,9 @@ namespace ELibrary.Controllers
                         Name = item.Name,
                         Email = item.Email
                     };
-                    _context.Add(author);
-                    await _context.SaveChangesAsync();
+                    _unitOfWork.AuthorRepository.Add(author);
+                    
+                    await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The author has been created.";
 
@@ -131,7 +120,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var author = await _context.Authors.FirstOrDefaultAsync(a => a.ID == id);
+            var author = await _unitOfWork.AuthorRepository.GetById(id);
             if (author == null)
             {
                 return NotFound();
@@ -162,17 +151,13 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var author = await _context.Authors.FirstOrDefaultAsync(a => a.ID == id);
-                    if (author == null)
-                    {
-                        return NotFound();
-                    }
-
+                    var author = await _unitOfWork.AuthorRepository.GetById(id);
                     author.Name = item.Name;
                     author.Email = item.Email;
                     author.UpdatedAt = DateTime.UtcNow;
-                    _context.Update(author);
-                    await _context.SaveChangesAsync();
+                    _unitOfWork.AuthorRepository.Update(author);
+                    
+                    await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The author has been updated.";
                     
@@ -193,13 +178,13 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var author = await _context.Authors.FirstOrDefaultAsync(a => a.ID == id);
+            var author = await _unitOfWork.AuthorRepository.GetById(id);
             if (author != null)
             {
-                _context.Authors.Remove(author);
+                _unitOfWork.AuthorRepository.Remove(author);
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             TempData["Message"] = "The author has been deleted.";
 

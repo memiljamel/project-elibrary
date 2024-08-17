@@ -1,22 +1,22 @@
-using ELibrary.Data;
 using ELibrary.Models;
+using ELibrary.Repositories;
 using ELibrary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using X.PagedList.EF;
+using X.PagedList.Extensions;
 
 namespace ELibrary.Controllers
 {
     [Authorize]
     public class BooksController : Controller
     {
-        private readonly ELibraryContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BooksController(ELibraryContext context)
+        public BooksController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -29,37 +29,24 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
             
-            var query = _context.Books
-                .Include(b => b.BooksAuthors)
-                .ThenInclude(ba => ba.Author)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(b => b.Title.ToLower().Contains(search.ToLower()) ||
-                                         b.BooksAuthors.Any(ba => ba.Author.Name.ToLower().Contains(search.ToLower())) ||
-                                         b.Publisher.ToLower().Contains(search.ToLower()) ||
-                                         b.Quantity.ToString().ToLower().Contains(search.ToLower()));
-            }
-            
-            var books = await query.OrderByDescending(b => b.CreatedAt)
-                .Select(b => new BookViewModel
-                {
-                    ID = b.ID,
-                    Title = b.Title,
-                    AuthorNames = string.Join(", ", b.BooksAuthors.Select(ba => ba.Author.Name)),
-                    Category = b.Category,
-                    Publisher = b.Publisher,
-                    Quantity = b.Quantity
-                })
-                .ToPagedListAsync(pageNumber, 15);
+            var books = await _unitOfWork.BookRepository.GetPagedBooksWithAuthors(search, pageNumber);
             
             if (books.PageNumber != 1 && pageNumber > books.PageCount)
             {
                 return NotFound();
             }
 
-            return View(books);
+            var items = books.Select(b => new BookViewModel
+            {
+                ID = b.ID,
+                Title = b.Title,
+                AuthorNames = string.Join(", ", b.BooksAuthors.Select(ba => ba.Author.Name)),
+                Category = b.Category,
+                Publisher = b.Publisher,
+                Quantity = b.Quantity
+            });
+
+            return View(items);
         }
 
         [HttpGet]
@@ -70,10 +57,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var book = await _context.Books
-                .Include(b => b.BooksAuthors)
-                .ThenInclude(ba => ba.Author)
-                .FirstOrDefaultAsync(b => b.ID == id);
+            var book = await _unitOfWork.BookRepository.GetBookWithAuthorsById(id);
             if (book == null)
             {
                 return NotFound();
@@ -97,7 +81,9 @@ namespace ELibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            ViewBag.Authors = new SelectList(await _context.Authors.ToListAsync(), "ID", "Name");
+            var authors = await _unitOfWork.AuthorRepository.GetAll();
+            
+            ViewBag.Authors = new SelectList(authors, "ID", "Name");
             
             return View();
         }
@@ -108,7 +94,9 @@ namespace ELibrary.Controllers
             [Bind("ID,Title,AuthorIDs,Category,Publisher,Quantity")] 
             BookFormViewModel item)
         {
-            ViewBag.Authors = new SelectList(await _context.Authors.ToListAsync(), "ID", "Name");
+            var authors = await _unitOfWork.AuthorRepository.GetAll();
+            
+            ViewBag.Authors = new SelectList(authors, "ID", "Name");
             
             if (ModelState.IsValid)
             {
@@ -121,7 +109,7 @@ namespace ELibrary.Controllers
                         Publisher = item.Publisher,
                         Quantity = item.Quantity
                     };
-                    _context.Add(book);
+                    _unitOfWork.BookRepository.Add(book);
 
                     foreach (var authorId in item.AuthorIDs)
                     {
@@ -130,10 +118,10 @@ namespace ELibrary.Controllers
                             BookID = book.ID,
                             AuthorID = authorId,
                         };
-                        _context.Add(bookAuthor);
+                        _unitOfWork.BookAuthorRepository.Add(bookAuthor);
                     }
                     
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
                     
                     TempData["Message"] = "The book has been created.";
                 
@@ -153,17 +141,16 @@ namespace ELibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(Guid? id)
         {
-            ViewBag.Authors = new SelectList(await _context.Authors.ToListAsync(), "ID", "Name");
+            var authors = await _unitOfWork.AuthorRepository.GetAll();
+            
+            ViewBag.Authors = new SelectList(authors, "ID", "Name");
             
             if (id == null)
             {
                 return NotFound();
             }
             
-            var book = await _context.Books
-                .Include(b => b.BooksAuthors)
-                .ThenInclude(ba => ba.Author)
-                .FirstOrDefaultAsync(b => b.ID == id);
+            var book = await _unitOfWork.BookRepository.GetBookWithAuthorsById(id);
             if (book == null)
             {
                 return NotFound();
@@ -173,7 +160,7 @@ namespace ELibrary.Controllers
             {
                 ID = book.ID,
                 Title = book.Title,
-                AuthorIDs = book.BooksAuthors.Select(ba => ba.AuthorID).ToList(),
+                AuthorIDs = book.BooksAuthors.Select(ba => ba.AuthorID),
                 Category = book.Category,
                 Publisher = book.Publisher,
                 Quantity = book.Quantity
@@ -189,7 +176,9 @@ namespace ELibrary.Controllers
             [Bind("ID,Title,AuthorIDs,Category,Publisher,Quantity")]
             BookFormViewModel item)
         {
-            ViewBag.Authors = new SelectList(await _context.Authors.ToListAsync(), "ID", "Name");
+            var authors = await _unitOfWork.AuthorRepository.GetAll();
+            
+            ViewBag.Authors = new SelectList(authors, "ID", "Name");
             
             if (id != item.ID)
             {
@@ -200,24 +189,16 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var book = await _context.Books
-                        .Include(b => b.BooksAuthors)
-                        .ThenInclude(ba => ba.Author)
-                        .FirstOrDefaultAsync(b => b.ID == id);
-                    if (book == null)
-                    {
-                        return NotFound();
-                    }
+                    var book = await _unitOfWork.BookRepository.GetBookWithAuthorsById(id);
                     
-                    book.BooksAuthors.Clear();
-                    await _context.SaveChangesAsync();
+                    _unitOfWork.BookAuthorRepository.RemoveRange(book.BooksAuthors);
 
                     book.Title = item.Title;
                     book.Category = item.Category;
                     book.Publisher = item.Publisher;
                     book.Quantity = item.Quantity;
                     book.UpdatedAt = DateTime.UtcNow;
-                    _context.Update(book);
+                    _unitOfWork.BookRepository.Update(book);
                     
                     foreach (var authorId in item.AuthorIDs)
                     {
@@ -226,10 +207,10 @@ namespace ELibrary.Controllers
                             BookID = book.ID,
                             AuthorID = authorId,
                         };
-                        _context.Add(bookAuthor);
+                        _unitOfWork.BookAuthorRepository.Add(bookAuthor);
                     }
                     
-                    await _context.SaveChangesAsync();
+                    await _unitOfWork.SaveChangesAsync();
                     
                     TempData["Message"] = "The book has been updated.";
 
@@ -250,17 +231,14 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var book = await _context.Books
-                .Include(b => b.BooksAuthors)
-                .ThenInclude(ba => ba.Author)
-                .FirstOrDefaultAsync(b => b.ID == id);
+            var book = await _unitOfWork.BookRepository.GetBookWithAuthorsById(id);
             if (book != null)
             {
-                book.BooksAuthors.Clear();
-                _context.Remove(book);
+                _unitOfWork.BookAuthorRepository.RemoveRange(book.BooksAuthors);
+                _unitOfWork.BookRepository.Remove(book);
             }
             
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             TempData["Message"] = "The book has been deleted.";
 
