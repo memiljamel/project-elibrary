@@ -1,23 +1,22 @@
-using ELibrary.Data;
 using ELibrary.Models;
+using ELibrary.Repositories;
 using ELibrary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using X.PagedList.EF;
+using X.PagedList.Extensions;
 
 namespace ELibrary.Controllers
 {
     [Authorize]
     public class BorrowingsController : Controller
     {
-        private readonly ELibraryContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public BorrowingsController(ELibraryContext context)
+        public BorrowingsController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -30,36 +29,23 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var query = _context.Borrowings
-                .Include(b => b.Member)
-                .Include(b => b.Book)
-                .AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(b => b.Member.MemberNumber.ToLower().Contains(search.ToLower()) ||
-                                         b.Book.Title.ToLower().Contains(search.ToLower()) ||
-                                         b.DateBorrow.ToString().ToLower().Contains(search.ToLower()) ||
-                                         b.DateReturn.ToString().ToLower().Contains(search.ToLower()));
-            }
-
-            var borrowings = await query.OrderByDescending(b => b.CreatedAt)
-                .Select(b => new BorrowingViewModel
-                {
-                    ID = b.ID,
-                    MemberNumber = b.Member.MemberNumber,
-                    BookTitle = b.Book.Title,
-                    DateBorrow = b.DateBorrow,
-                    DateReturn = b.DateReturn
-                })
-                .ToPagedListAsync(pageNumber, 15);
+            var borrowings = await _unitOfWork.BorrowingRepository.GetBorrowingDetails(search, pageNumber);
 
             if (borrowings.PageNumber != 1 && pageNumber > borrowings.PageCount)
             {
                 return NotFound();
             }
 
-            return View(borrowings);
+            var items = borrowings.Select(b => new BorrowingViewModel
+            {
+                ID = b.ID,
+                MemberNumber = b.Member.MemberNumber,
+                BookTitle = b.Book.Title,
+                DateBorrow = b.DateBorrow,
+                DateReturn = b.DateReturn
+            });
+
+            return View(items);
         }
 
         [HttpGet]
@@ -70,10 +56,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var borrowing = await _context.Borrowings
-                .Include(b => b.Member)
-                .Include(b => b.Book)
-                .FirstOrDefaultAsync(b => b.ID == id);
+            var borrowing = await _unitOfWork.BorrowingRepository.GetBorrowingDetailById(id);
             if (borrowing == null)
             {
                 return NotFound();
@@ -96,8 +79,11 @@ namespace ELibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> Create()
         {
-            ViewBag.Members = new SelectList(await _context.Members.ToListAsync(), "ID", "MemberNumber");
-            ViewBag.Books = new SelectList(await _context.Books.ToListAsync(), "ID", "Title");
+            var members = await _unitOfWork.MemberRepository.GetAll();
+            var books = await _unitOfWork.BookRepository.GetAll();
+
+            ViewBag.Members = new SelectList(members, "ID", "MemberNumber");
+            ViewBag.Books = new SelectList(books, "ID", "Title");
 
             return View();
         }
@@ -107,8 +93,11 @@ namespace ELibrary.Controllers
         public async Task<IActionResult> Create(
             [Bind("MemberID,BookID,DateBorrow")] BorrowingCreateViewModel item)
         {
-            ViewBag.Members = new SelectList(await _context.Members.ToListAsync(), "ID", "MemberNumber");
-            ViewBag.Books = new SelectList(await _context.Books.ToListAsync(), "ID", "Title");
+            var members = await _unitOfWork.MemberRepository.GetAll();
+            var books = await _unitOfWork.BookRepository.GetAll();
+
+            ViewBag.Members = new SelectList(members, "ID", "MemberNumber");
+            ViewBag.Books = new SelectList(books, "ID", "Title");
 
             if (ModelState.IsValid)
             {
@@ -120,11 +109,11 @@ namespace ELibrary.Controllers
                         BookID = item.BookID,
                         DateBorrow = item.DateBorrow
                     };
-                    _context.Add(borrowing);
-                    
+                    _unitOfWork.BorrowingRepository.Add(borrowing);
+
                     borrowing.Book.Quantity -= 1;
-                    
-                    await _context.SaveChangesAsync();
+
+                    await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The borrowing has been created.";
 
@@ -144,18 +133,18 @@ namespace ELibrary.Controllers
         [HttpGet]
         public async Task<IActionResult> Edit(Guid? id)
         {
-            ViewBag.Members = new SelectList(await _context.Members.ToListAsync(), "ID", "MemberNumber");
-            ViewBag.Books = new SelectList(await _context.Books.ToListAsync(), "ID", "Title");
+            var members = await _unitOfWork.MemberRepository.GetAll();
+            var books = await _unitOfWork.BookRepository.GetAll();
+
+            ViewBag.Members = new SelectList(members, "ID", "MemberNumber");
+            ViewBag.Books = new SelectList(books, "ID", "Title");
 
             if (id == null)
             {
                 return NotFound();
             }
 
-            var borrowing = await _context.Borrowings
-                .Include(b => b.Member)
-                .Include(b => b.Book)
-                .FirstOrDefaultAsync(b => b.ID == id);
+            var borrowing = await _unitOfWork.BorrowingRepository.GetBorrowingDetailById(id);
             if (borrowing == null)
             {
                 return NotFound();
@@ -181,8 +170,11 @@ namespace ELibrary.Controllers
             [Bind("ID,MemberID,MemberNumber,BookID,DateBorrow,DateReturn")]
             BorrowingEditViewModel item)
         {
-            ViewBag.Members = new SelectList(await _context.Members.ToListAsync(), "ID", "MemberNumber");
-            ViewBag.Books = new SelectList(await _context.Books.ToListAsync(), "ID", "Title");
+            var members = await _unitOfWork.MemberRepository.GetAll();
+            var books = await _unitOfWork.BookRepository.GetAll();
+
+            ViewBag.Members = new SelectList(members, "ID", "MemberNumber");
+            ViewBag.Books = new SelectList(books, "ID", "Title");
 
             if (id != item.ID)
             {
@@ -193,24 +185,16 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var borrowing = await _context.Borrowings
-                        .Include(b => b.Member)
-                        .Include(b => b.Book)
-                        .FirstOrDefaultAsync(b => b.ID == id);
-                    if (borrowing == null)
-                    {
-                        return NotFound();
-                    }
-
+                    var borrowing = await _unitOfWork.BorrowingRepository.GetBorrowingDetailById(id);
                     borrowing.MemberID = item.MemberID;
                     borrowing.BookID = item.BookID;
                     borrowing.DateReturn = item.DateReturn;
                     borrowing.UpdatedAt = DateTime.UtcNow;
-                    
+                    _unitOfWork.BorrowingRepository.Update(borrowing);
+
                     borrowing.Book.Quantity += 1;
-                    
-                    _context.Update(borrowing);
-                    await _context.SaveChangesAsync();
+
+                    await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The borrowing has been updated.";
 
@@ -231,21 +215,18 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var borrowing = await _context.Borrowings
-                .Include(b => b.Member)
-                .Include(b => b.Book)
-                .FirstOrDefaultAsync(b => b.ID == id);
+            var borrowing = await _unitOfWork.BorrowingRepository.GetBorrowingDetailById(id);
             if (borrowing != null)
             {
+                _unitOfWork.BorrowingRepository.Remove(borrowing);
+
                 if (borrowing.DateReturn == null)
                 {
                     borrowing.Book.Quantity += 1;
                 }
-                
-                _context.Borrowings.Remove(borrowing);
             }
-            
-            await _context.SaveChangesAsync();
+
+            await _unitOfWork.SaveChangesAsync();
 
             TempData["Message"] = "The borrowing has been deleted.";
 

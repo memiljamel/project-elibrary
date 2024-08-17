@@ -1,10 +1,10 @@
-using ELibrary.Data;
 using ELibrary.Models;
+using ELibrary.Repositories;
 using ELibrary.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using X.PagedList.EF;
+using X.PagedList.Extensions;
 using BC = BCrypt.Net.BCrypt;
 
 namespace ELibrary.Controllers
@@ -12,11 +12,11 @@ namespace ELibrary.Controllers
     [Authorize]
     public class EmployeesController : Controller
     {
-        private readonly ELibraryContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public EmployeesController(ELibraryContext context)
+        public EmployeesController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
 
         [HttpGet]
@@ -29,32 +29,23 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var query = _context.Employees.AsQueryable();
-
-            if (!string.IsNullOrEmpty(search))
-            {
-                query = query.Where(e => e.EmployeeNumber.ToLower().Contains(search.ToLower()) ||
-                                         e.Name.ToLower().Contains(search.ToLower()) ||
-                                         e.Username.ToLower().Contains(search.ToLower()));
-            }
-
-            var employees = await query.OrderByDescending(e => e.CreatedAt)
-                .Select(e => new EmployeeViewModel
-                {
-                    ID = e.ID,
-                    EmployeeNumber = e.EmployeeNumber,
-                    Name = e.Name,
-                    AccessLevel = e.AccessLevel,
-                    Username = e.Username
-                })
-                .ToPagedListAsync(pageNumber, 15);
+            var employees = await _unitOfWork.EmployeeRepository.GetPagedEmployees(search, pageNumber);
 
             if (employees.PageNumber != 1 && pageNumber > employees.PageCount)
             {
                 return NotFound();
             }
 
-            return View(employees);
+            var items = employees.Select(e => new EmployeeViewModel
+            {
+                ID = e.ID,
+                EmployeeNumber = e.EmployeeNumber,
+                Name = e.Name,
+                AccessLevel = e.AccessLevel,
+                Username = e.Username
+            });
+
+            return View(items);
         }
 
         [HttpGet]
@@ -65,7 +56,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ID == id);
+            var employee = await _unitOfWork.EmployeeRepository.GetById(id);
             if (employee == null)
             {
                 return NotFound();
@@ -111,8 +102,9 @@ namespace ELibrary.Controllers
                         Username = item.Username,
                         Password = BC.HashPassword(item.Password)
                     };
-                    _context.Add(employee);
-                    await _context.SaveChangesAsync();
+                    _unitOfWork.EmployeeRepository.Add(employee);
+                    
+                    await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The employee has been created.";
 
@@ -138,7 +130,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ID == id);
+            var employee = await _unitOfWork.EmployeeRepository.GetById(id);
             if (employee == null)
             {
                 return NotFound();
@@ -168,17 +160,12 @@ namespace ELibrary.Controllers
             {
                 return NotFound();
             }
-            
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ID == id);
-                    if (employee == null)
-                    {
-                        return NotFound();
-                    }
-                    
+                    var employee = await _unitOfWork.EmployeeRepository.GetById(id);
                     employee.EmployeeNumber = item.EmployeeNumber;
                     employee.Name = item.Name;
                     employee.AccessLevel = item.AccessLevel;
@@ -189,8 +176,9 @@ namespace ELibrary.Controllers
                         employee.Password = BC.HashPassword(item.Password);
                     }
 
-                    _context.Update(employee);
-                    await _context.SaveChangesAsync();
+                    _unitOfWork.EmployeeRepository.Update(employee);
+                    
+                    await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The employee has been updated.";
 
@@ -212,13 +200,13 @@ namespace ELibrary.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.ID == id);
+            var employee = await _unitOfWork.EmployeeRepository.GetById(id);
             if (employee != null)
             {
-                _context.Remove(employee);
+                _unitOfWork.EmployeeRepository.Remove(employee);
             }
 
-            await _context.SaveChangesAsync();
+            await _unitOfWork.SaveChangesAsync();
 
             TempData["Message"] = "The employee has been deleted.";
 

@@ -1,5 +1,5 @@
 using System.Security.Claims;
-using ELibrary.Data;
+using ELibrary.Repositories;
 using ELibrary.ViewModels;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
@@ -13,13 +13,13 @@ namespace ELibrary.Controllers
     [Authorize]
     public class AccountController : Controller
     {
-        private readonly ELibraryContext _context;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public AccountController(ELibraryContext context)
+        public AccountController(IUnitOfWork unitOfWork)
         {
-            _context = context;
+            _unitOfWork = unitOfWork;
         }
-        
+
         [HttpGet]
         [AllowAnonymous]
         public IActionResult Login(string? returnUrl = null)
@@ -38,13 +38,14 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
         public async Task<IActionResult> Login(
-            [Bind("Username,Password,IsRemembered")] LoginViewModel item, string? returnUrl = null)
+            [Bind("Username,Password,RememberMe")] LoginViewModel item, 
+            string? returnUrl = null)
         {
             ViewData["ReturnUrl"] = returnUrl;
 
             if (ModelState.IsValid)
             {
-                var user = await _context.Employees.FirstOrDefaultAsync(e => e.Username == item.Username);
+                var user = await _unitOfWork.EmployeeRepository.GetEmployeeByUsername(item.Username);
                 
                 if (user == null || !BC.Verify(item.Password, user.Password))
                 {
@@ -102,7 +103,7 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
             
-            var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Username == username);
+            var employee = await _unitOfWork.EmployeeRepository.GetEmployeeByUsername(username);
             if (employee == null)
             {
                 return NotFound();
@@ -135,12 +136,7 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var employee = await _context.Employees.FirstOrDefaultAsync(e => e.Username == username);
-                    if (employee == null)
-                    {
-                        return NotFound();
-                    }
-                    
+                    var employee = await _unitOfWork.EmployeeRepository.GetEmployeeByUsername(username);
                     employee.Name = item.Name;
                     employee.UpdatedAt = DateTime.UtcNow;
 
@@ -149,8 +145,9 @@ namespace ELibrary.Controllers
                         employee.Password = BC.HashPassword(item.Password);
                     }
 
-                    _context.Update(employee);
-                    await _context.SaveChangesAsync();
+                    _unitOfWork.EmployeeRepository.Update(employee);
+                    
+                    await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The profile has been updated.";
 

@@ -1,4 +1,5 @@
 using ELibrary.Data;
+using ELibrary.Repositories;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Vite.AspNetCore;
@@ -20,6 +21,7 @@ else
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 builder.Services.AddViteServices();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 	.AddCookie(options =>
 	{
