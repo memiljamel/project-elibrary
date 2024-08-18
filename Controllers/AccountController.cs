@@ -31,7 +31,12 @@ namespace ELibrary.Controllers
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
             
-            return View();
+            var item = new LoginViewModel
+            {
+                RememberMe = true
+            };
+            
+            return View(item);
         }
 
         [HttpPost]

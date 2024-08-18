@@ -1,5 +1,8 @@
 using ELibrary.Data;
 using ELibrary.Repositories;
+using ELibrary.Validators;
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using Vite.AspNetCore;
@@ -19,9 +22,22 @@ else
 }
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+	options.SuppressImplicitRequiredAttributeForNonNullableReferenceTypes = true);
 builder.Services.AddViteServices();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddFluentValidationAutoValidation(options => 
+	options.DisableDataAnnotationsValidation = true);
+builder.Services.AddFluentValidationClientsideAdapters();
+builder.Services.AddValidatorsFromAssemblyContaining<EmployeeCreateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<EmployeeEditValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<MemberFormValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<AuthorFormValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<BookFormValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<BorrowingCreateValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<BorrowingEditValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<ProfileValidator>();
+builder.Services.AddValidatorsFromAssemblyContaining<LoginValidator>();
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
 	.AddCookie(options =>
 	{

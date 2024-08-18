@@ -5,18 +5,14 @@ namespace ELibrary.ViewModels
 {
     public class AuthorFormViewModel
     {
-        [Required]
         [HiddenInput]
         public Guid ID { get; set; }
         
-        [Required]
-        [StringLength(100)]
         [DataType(DataType.Text)]
         public string Name { get; set; }
         
-        [EmailAddress]
-        [StringLength(100)]
         [DataType(DataType.EmailAddress)]
+        [Display(Name = "Email (optional)")]
         public string? Email { get; set; }
     }
 }

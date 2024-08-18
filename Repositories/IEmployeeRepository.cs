@@ -7,6 +7,10 @@ namespace ELibrary.Repositories
     {
         Task<IPagedList<Employee>> GetPagedEmployees(string search, int pageNumber, int pageSize = 15);
 
-        Task<Employee?> GetEmployeeByUsername(string username);
+        Task<Employee?> GetEmployeeByUsername(string? username);
+
+        bool IsEmployeeNumberUnique(string employeeNumber, Guid? id);
+
+        bool IsUsernameUnique(string username, Guid? id);
     }
 }

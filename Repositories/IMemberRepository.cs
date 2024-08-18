@@ -8,5 +8,7 @@ namespace ELibrary.Repositories
         Task<IPagedList<Member>> GetPagedMembersWithPhones(string search, int pageNumber, int pageSize = 15);
 
         Task<Member?> GetMemberWithPhonesById(Guid? id);
+
+        bool IsMemberNumberUnique(string memberNumber, Guid? id);
     }
 }

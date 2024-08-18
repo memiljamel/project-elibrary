@@ -27,9 +27,19 @@ namespace ELibrary.Repositories
                 .ToPagedListAsync(pageNumber, pageSize);
         }
 
-        public async Task<Employee?> GetEmployeeByUsername(string username)
+        public async Task<Employee?> GetEmployeeByUsername(string? username)
         {
             return await _context.Employees.FirstOrDefaultAsync(e => e.Username == username);
+        }
+
+        public bool IsEmployeeNumberUnique(string employeeNumber, Guid? id)
+        {
+            return !_context.Employees.Any(e => e.EmployeeNumber == employeeNumber && e.ID != id);
+        }
+
+        public bool IsUsernameUnique(string username, Guid? id)
+        {
+            return !_context.Employees.Any(e => e.Username == username && e.ID != id);
         }
     }
 }

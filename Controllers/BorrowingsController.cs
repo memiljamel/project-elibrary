@@ -85,7 +85,12 @@ namespace ELibrary.Controllers
             ViewBag.Members = new SelectList(members, "ID", "MemberNumber");
             ViewBag.Books = new SelectList(books, "ID", "Title");
 
-            return View();
+            var item = new BorrowingCreateViewModel
+            {
+                DateBorrow = DateOnly.FromDateTime(DateTime.Today)
+            };
+            
+            return View(item);
         }
 
         [HttpPost]

@@ -37,5 +37,10 @@ namespace ELibrary.Repositories
                 .Include(m => m.Phones)
                 .FirstOrDefaultAsync(m => m.ID == id);
         }
+
+        public bool IsMemberNumberUnique(string memberNumber, Guid? id)
+        {
+            return !_context.Members.Any(m => m.MemberNumber == memberNumber && m.ID != id);
+        }
     }
 }
