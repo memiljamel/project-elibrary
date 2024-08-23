@@ -19,7 +19,7 @@ namespace ELibrary.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string search, int pageNumber = 1)
+        public async Task<IActionResult> Index(string? search, int pageNumber = 1)
         {
             ViewData["Search"] = search;
 
@@ -177,28 +177,29 @@ namespace ELibrary.Controllers
                 try
                 {
                     var member = await _unitOfWork.MemberRepository.GetMemberWithPhonesById(id);
-                    
-                    _unitOfWork.PhoneRepository.RemoveRange(member.Phones);
-                    
-                    member.MemberNumber = item.MemberNumber;
-                    member.Name = item.Name;
-                    member.Email = item.Email;
-                    member.Address = item.Address;
-                    member.UpdatedAt = DateTime.UtcNow;
-                    _unitOfWork.MemberRepository.Update(member);
-                    
-                    var phoneNumbers = item.PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
-                        .Select(p => p.Trim())
-                        .ToList();
-
-                    foreach (var phoneNumber in phoneNumbers)
+                    if (member != null)
                     {
-                        var phone = new Phone
+                        _unitOfWork.PhoneRepository.RemoveRange(member.Phones);
+                    
+                        member.MemberNumber = item.MemberNumber;
+                        member.Name = item.Name;
+                        member.Email = item.Email;
+                        member.Address = item.Address;
+                        member.UpdatedAt = DateTime.UtcNow;
+                    
+                        var phoneNumbers = item.PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
+                            .Select(p => p.Trim())
+                            .ToList();
+
+                        foreach (var phoneNumber in phoneNumbers)
                         {
-                            PhoneNumber = phoneNumber,
-                            MemberID = member.ID
-                        };
-                        _unitOfWork.PhoneRepository.Add(phone);
+                            var phone = new Phone
+                            {
+                                PhoneNumber = phoneNumber,
+                                MemberID = member.ID
+                            };
+                            _unitOfWork.PhoneRepository.Add(phone);
+                        }
                     }
                     
                     await _unitOfWork.SaveChangesAsync();

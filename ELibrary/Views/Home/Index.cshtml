@@ -1,0 +1,17 @@
+﻿@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="flex flex-col w-full h-full p-0 m-0 relative">
+
+    @await Html.PartialAsync("_Header")
+
+    @await Html.PartialAsync("_Sidebar")
+    
+    <main class="block flex-grow flex-shrink-0 w-auto h-auto p-0 mt-14 ml-0 lg:mt-16 lg:ml-64">
+        <div class="block w-full max-w-7xl h-auto p-4 mx-auto overflow-hidden xl:m-0"></div>
+    </main>
+    
+    @await Html.PartialAsync("_Footer")
+
+</div>

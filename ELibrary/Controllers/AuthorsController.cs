@@ -19,7 +19,7 @@ namespace ELibrary.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string search, int pageNumber = 1)
+        public async Task<IActionResult> Index(string? search, int pageNumber = 1)
         {
             ViewData["Search"] = search;
 
@@ -152,10 +152,12 @@ namespace ELibrary.Controllers
                 try
                 {
                     var author = await _unitOfWork.AuthorRepository.GetById(id);
-                    author.Name = item.Name;
-                    author.Email = item.Email;
-                    author.UpdatedAt = DateTime.UtcNow;
-                    _unitOfWork.AuthorRepository.Update(author);
+                    if (author != null)
+                    {
+                        author.Name = item.Name;
+                        author.Email = item.Email;
+                        author.UpdatedAt = DateTime.UtcNow;
+                    }
                     
                     await _unitOfWork.SaveChangesAsync();
 
