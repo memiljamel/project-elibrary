@@ -20,7 +20,7 @@ namespace ELibrary.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string search, int pageNumber = 1)
+        public async Task<IActionResult> Index(string? search, int pageNumber = 1)
         {
             ViewData["Search"] = search;
 
@@ -190,24 +190,25 @@ namespace ELibrary.Controllers
                 try
                 {
                     var book = await _unitOfWork.BookRepository.GetBookWithAuthorsById(id);
-                    
-                    _unitOfWork.BookAuthorRepository.RemoveRange(book.BooksAuthors);
-
-                    book.Title = item.Title;
-                    book.Category = item.Category;
-                    book.Publisher = item.Publisher;
-                    book.Quantity = item.Quantity;
-                    book.UpdatedAt = DateTime.UtcNow;
-                    _unitOfWork.BookRepository.Update(book);
-                    
-                    foreach (var authorId in item.AuthorIDs)
+                    if (book != null)
                     {
-                        var bookAuthor = new BookAuthor
+                        _unitOfWork.BookAuthorRepository.RemoveRange(book.BooksAuthors);
+
+                        book.Title = item.Title;
+                        book.Category = item.Category;
+                        book.Publisher = item.Publisher;
+                        book.Quantity = item.Quantity;
+                        book.UpdatedAt = DateTime.UtcNow;
+                    
+                        foreach (var authorId in item.AuthorIDs)
                         {
-                            BookID = book.ID,
-                            AuthorID = authorId,
-                        };
-                        _unitOfWork.BookAuthorRepository.Add(bookAuthor);
+                            var bookAuthor = new BookAuthor
+                            {
+                                BookID = book.ID,
+                                AuthorID = authorId,
+                            };
+                            _unitOfWork.BookAuthorRepository.Add(bookAuthor);
+                        }
                     }
                     
                     await _unitOfWork.SaveChangesAsync();

@@ -12,7 +12,7 @@ namespace ELibrary.Repositories
         {
         }
 
-        public async Task<IPagedList<Employee>> GetPagedEmployees(string search, int pageNumber, int pageSize = 15)
+        public async Task<IPagedList<Employee>> GetPagedEmployees(string? search, int pageNumber, int pageSize = 15)
         {
             var query = _context.Employees.AsQueryable();
 

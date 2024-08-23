@@ -20,7 +20,7 @@ namespace ELibrary.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string search, int pageNumber = 1)
+        public async Task<IActionResult> Index(string? search, int pageNumber = 1)
         {
             ViewData["Search"] = search;
 
@@ -87,7 +87,7 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Create(
-            [Bind("Name,EmployeeNumber,AccessLevel,Username,Password,PasswordConfirmation")]
+            [Bind("EmployeeNumber,Name,AccessLevel,Username,Password,PasswordConfirmation")]
             EmployeeCreateViewModel item)
         {
             if (ModelState.IsValid)
@@ -153,7 +153,7 @@ namespace ELibrary.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(
             Guid id,
-            [Bind("ID,Name,EmployeeNumber,AccessLevel,Username,Password,PasswordConfirmation")]
+            [Bind("ID,EmployeeNumber,Name,AccessLevel,Username,Password,PasswordConfirmation")]
             EmployeeEditViewModel item)
         {
             if (id != item.ID)
@@ -166,17 +166,18 @@ namespace ELibrary.Controllers
                 try
                 {
                     var employee = await _unitOfWork.EmployeeRepository.GetById(id);
-                    employee.EmployeeNumber = item.EmployeeNumber;
-                    employee.Name = item.Name;
-                    employee.AccessLevel = item.AccessLevel;
-                    employee.UpdatedAt = DateTime.UtcNow;
-
-                    if (!string.IsNullOrEmpty(item.Password))
+                    if (employee != null)
                     {
-                        employee.Password = BC.HashPassword(item.Password);
-                    }
+                        employee.EmployeeNumber = item.EmployeeNumber;
+                        employee.Name = item.Name;
+                        employee.AccessLevel = item.AccessLevel;
+                        employee.UpdatedAt = DateTime.UtcNow;
 
-                    _unitOfWork.EmployeeRepository.Update(employee);
+                        if (!string.IsNullOrEmpty(item.Password))
+                        {
+                            employee.Password = BC.HashPassword(item.Password);
+                        }
+                    }
                     
                     await _unitOfWork.SaveChangesAsync();
 

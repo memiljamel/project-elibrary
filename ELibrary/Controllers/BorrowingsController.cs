@@ -20,7 +20,7 @@ namespace ELibrary.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> Index(string search, int pageNumber = 1)
+        public async Task<IActionResult> Index(string? search, int pageNumber = 1)
         {
             ViewData["Search"] = search;
 
@@ -191,13 +191,15 @@ namespace ELibrary.Controllers
                 try
                 {
                     var borrowing = await _unitOfWork.BorrowingRepository.GetBorrowingDetailById(id);
-                    borrowing.MemberID = item.MemberID;
-                    borrowing.BookID = item.BookID;
-                    borrowing.DateReturn = item.DateReturn;
-                    borrowing.UpdatedAt = DateTime.UtcNow;
-                    _unitOfWork.BorrowingRepository.Update(borrowing);
-
-                    borrowing.Book.Quantity += 1;
+                    if (borrowing != null)
+                    {
+                        borrowing.MemberID = item.MemberID;
+                        borrowing.BookID = item.BookID;
+                        borrowing.DateReturn = item.DateReturn;
+                        borrowing.UpdatedAt = DateTime.UtcNow;
+                        
+                        borrowing.Book.Quantity += 1;
+                    }
 
                     await _unitOfWork.SaveChangesAsync();
 

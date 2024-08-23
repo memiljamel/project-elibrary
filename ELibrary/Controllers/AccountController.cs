@@ -142,15 +142,16 @@ namespace ELibrary.Controllers
                 try
                 {
                     var employee = await _unitOfWork.EmployeeRepository.GetEmployeeByUsername(username);
-                    employee.Name = item.Name;
-                    employee.UpdatedAt = DateTime.UtcNow;
-
-                    if (!string.IsNullOrEmpty(item.Password))
+                    if (employee != null)
                     {
-                        employee.Password = BC.HashPassword(item.Password);
-                    }
+                        employee.Name = item.Name;
+                        employee.UpdatedAt = DateTime.UtcNow;
 
-                    _unitOfWork.EmployeeRepository.Update(employee);
+                        if (!string.IsNullOrEmpty(item.Password))
+                        {
+                            employee.Password = BC.HashPassword(item.Password);
+                        }
+                    }
                     
                     await _unitOfWork.SaveChangesAsync();
 
