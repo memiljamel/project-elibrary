@@ -29,7 +29,10 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var borrowings = await _unitOfWork.BorrowingRepository.GetBorrowingDetails(search, pageNumber);
+            var borrowings = await _unitOfWork.BorrowingRepository.GetBorrowingDetails(
+                search,
+                pageNumber
+            );
 
             if (borrowings.PageNumber != 1 && pageNumber > borrowings.PageCount)
             {
@@ -42,7 +45,7 @@ namespace ELibrary.Controllers
                 MemberNumber = b.Member.MemberNumber,
                 BookTitle = b.Book.Title,
                 DateBorrow = b.DateBorrow,
-                DateReturn = b.DateReturn
+                DateReturn = b.DateReturn,
             });
 
             return View(items);
@@ -70,7 +73,7 @@ namespace ELibrary.Controllers
                 DateBorrow = borrowing.DateBorrow,
                 DateReturn = borrowing.DateReturn,
                 CreatedAt = borrowing.CreatedAt,
-                UpdatedAt = borrowing.UpdatedAt
+                UpdatedAt = borrowing.UpdatedAt,
             };
 
             return View(item);
@@ -85,18 +88,19 @@ namespace ELibrary.Controllers
             ViewBag.Members = new SelectList(members, "ID", "MemberNumber");
             ViewBag.Books = new SelectList(books, "ID", "Title");
 
-            var item = new BorrowingCreateViewModel
+            var item = new CreateBorrowingViewModel
             {
-                DateBorrow = DateOnly.FromDateTime(DateTime.Today)
+                DateBorrow = DateOnly.FromDateTime(DateTime.Today),
             };
-            
+
             return View(item);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("MemberID,BookID,DateBorrow")] BorrowingCreateViewModel item)
+            [Bind("MemberID,BookID,DateBorrow")] CreateBorrowingViewModel item
+        )
         {
             var members = await _unitOfWork.MemberRepository.GetAll();
             var books = await _unitOfWork.BookRepository.GetAll();
@@ -112,7 +116,7 @@ namespace ELibrary.Controllers
                     {
                         MemberID = item.MemberID,
                         BookID = item.BookID,
-                        DateBorrow = item.DateBorrow
+                        DateBorrow = item.DateBorrow,
                     };
                     _unitOfWork.BorrowingRepository.Add(borrowing);
 
@@ -126,9 +130,12 @@ namespace ELibrary.Controllers
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                           "Try again, and if the problem persists " +
-                                                           "see your system administrator.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to save changes. "
+                            + "Try again, and if the problem persists "
+                            + "see your system administrator."
+                    );
                 }
             }
 
@@ -155,14 +162,14 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var item = new BorrowingEditViewModel
+            var item = new EditBorrowingViewModel
             {
                 ID = borrowing.ID,
                 MemberID = borrowing.MemberID,
                 MemberNumber = borrowing.Member.MemberNumber,
                 BookID = borrowing.BookID,
                 DateBorrow = borrowing.DateBorrow,
-                DateReturn = borrowing.DateReturn
+                DateReturn = borrowing.DateReturn,
             };
 
             return View(item);
@@ -173,7 +180,8 @@ namespace ELibrary.Controllers
         public async Task<IActionResult> Edit(
             Guid id,
             [Bind("ID,MemberID,MemberNumber,BookID,DateBorrow,DateReturn")]
-            BorrowingEditViewModel item)
+                EditBorrowingViewModel item
+        )
         {
             var members = await _unitOfWork.MemberRepository.GetAll();
             var books = await _unitOfWork.BookRepository.GetAll();
@@ -190,14 +198,16 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var borrowing = await _unitOfWork.BorrowingRepository.GetBorrowingDetailById(id);
+                    var borrowing = await _unitOfWork.BorrowingRepository.GetBorrowingDetailById(
+                        id
+                    );
                     if (borrowing != null)
                     {
                         borrowing.MemberID = item.MemberID;
                         borrowing.BookID = item.BookID;
                         borrowing.DateReturn = item.DateReturn;
                         borrowing.UpdatedAt = DateTime.UtcNow;
-                        
+
                         borrowing.Book.Quantity += 1;
                     }
 
@@ -209,9 +219,12 @@ namespace ELibrary.Controllers
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                           "Try again, and if the problem persists " +
-                                                           "see your system administrator.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to save changes. "
+                            + "Try again, and if the problem persists "
+                            + "see your system administrator."
+                    );
                 }
             }
 

@@ -28,13 +28,16 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var members = await _unitOfWork.MemberRepository.GetPagedMembersWithPhones(search, pageNumber);
-            
+            var members = await _unitOfWork.MemberRepository.GetPagedMembersWithPhones(
+                search,
+                pageNumber
+            );
+
             if (members.PageNumber != 1 && pageNumber > members.PageCount)
             {
                 return NotFound();
             }
-            
+
             var items = members.Select(m => new MemberViewModel
             {
                 ID = m.ID,
@@ -42,7 +45,7 @@ namespace ELibrary.Controllers
                 Name = m.Name,
                 Email = m.Email,
                 PhoneNumbers = string.Join(", ", m.Phones.Select(p => p.PhoneNumber)),
-                Address = m.Address
+                Address = m.Address,
             });
 
             return View(items);
@@ -71,7 +74,7 @@ namespace ELibrary.Controllers
                 PhoneNumbers = string.Join(", ", member.Phones.Select(p => p.PhoneNumber)),
                 Address = member.Address,
                 CreatedAt = member.CreatedAt,
-                UpdatedAt = member.UpdatedAt
+                UpdatedAt = member.UpdatedAt,
             };
 
             return View(item);
@@ -86,8 +89,8 @@ namespace ELibrary.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(
-            [Bind("ID,MemberNumber,Name,Email,PhoneNumbers,Address")]
-            MemberFormViewModel item)
+            [Bind("ID,MemberNumber,Name,Email,PhoneNumbers,Address")] FormMemberViewModel item
+        )
         {
             if (ModelState.IsValid)
             {
@@ -98,24 +101,21 @@ namespace ELibrary.Controllers
                         MemberNumber = item.MemberNumber,
                         Name = item.Name,
                         Email = item.Email,
-                        Address = item.Address
+                        Address = item.Address,
                     };
                     _unitOfWork.MemberRepository.Add(member);
 
-                    var phoneNumbers = item.PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
+                    var phoneNumbers = item
+                        .PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
                         .Select(p => p.Trim())
                         .ToList();
-                    
+
                     foreach (var phoneNumber in phoneNumbers)
                     {
-                        var phone = new Phone
-                        {
-                            PhoneNumber = phoneNumber,
-                            MemberID = member.ID
-                        };
+                        var phone = new Phone { PhoneNumber = phoneNumber, MemberID = member.ID };
                         _unitOfWork.PhoneRepository.Add(phone);
                     }
-                    
+
                     await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The member has been created.";
@@ -124,9 +124,12 @@ namespace ELibrary.Controllers
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                           "Try again, and if the problem persists " +
-                                                           "see your system administrator.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to save changes. "
+                            + "Try again, and if the problem persists "
+                            + "see your system administrator."
+                    );
                 }
             }
 
@@ -147,14 +150,14 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var item = new MemberFormViewModel
+            var item = new FormMemberViewModel
             {
                 ID = member.ID,
                 MemberNumber = member.MemberNumber,
                 Name = member.Name,
                 Email = member.Email,
                 PhoneNumbers = string.Join(", ", member.Phones.Select(p => p.PhoneNumber)),
-                Address = member.Address
+                Address = member.Address,
             };
 
             return View(item);
@@ -164,8 +167,8 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
             Guid id,
-            [Bind("ID,MemberNumber,Name,Email,PhoneNumbers,Address")]
-            MemberFormViewModel item)
+            [Bind("ID,MemberNumber,Name,Email,PhoneNumbers,Address")] FormMemberViewModel item
+        )
         {
             if (id != item.ID)
             {
@@ -180,14 +183,15 @@ namespace ELibrary.Controllers
                     if (member != null)
                     {
                         _unitOfWork.PhoneRepository.RemoveRange(member.Phones);
-                    
+
                         member.MemberNumber = item.MemberNumber;
                         member.Name = item.Name;
                         member.Email = item.Email;
                         member.Address = item.Address;
                         member.UpdatedAt = DateTime.UtcNow;
-                    
-                        var phoneNumbers = item.PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
+
+                        var phoneNumbers = item
+                            .PhoneNumbers.Split(",", StringSplitOptions.RemoveEmptyEntries)
                             .Select(p => p.Trim())
                             .ToList();
 
@@ -196,12 +200,12 @@ namespace ELibrary.Controllers
                             var phone = new Phone
                             {
                                 PhoneNumber = phoneNumber,
-                                MemberID = member.ID
+                                MemberID = member.ID,
                             };
                             _unitOfWork.PhoneRepository.Add(phone);
                         }
                     }
-                    
+
                     await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The member has been updated.";
@@ -210,9 +214,12 @@ namespace ELibrary.Controllers
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                           "Try again, and if the problem persists " +
-                                                           "see your system administrator.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to save changes. "
+                            + "Try again, and if the problem persists "
+                            + "see your system administrator."
+                    );
                 }
             }
 

@@ -22,7 +22,7 @@ namespace ELibrary.Models
         public Guid BookID { get; set; }
 
         public Member Member { get; set; }
-        
+
         public Book Book { get; set; }
     }
 }

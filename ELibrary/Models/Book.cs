@@ -1,29 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ELibrary.Enums;
 
 namespace ELibrary.Models
 {
-    public enum Category
-    {
-        Fiction,
-        [Display(Name = "Non Fiction")]
-        NonFiction,
-        Biography,
-        Automotive,
-        Health,
-        Technology,
-        Science,
-        History,
-        Art,
-        Business,
-        [Display(Name = "Self Help")]
-        SelfHelp,
-        Comics,
-        Novel,
-        Poetry,
-        Encyclopedia
-    }
-    
     [Table("books")]
     public class Book : BaseEntity
     {
@@ -34,7 +14,7 @@ namespace ELibrary.Models
 
         [Required]
         [Column("category", Order = 4)]
-        public Category Category { get; set; }
+        public CategoryEnum Category { get; set; }
 
         [Required]
         [MaxLength(100)]
@@ -46,7 +26,7 @@ namespace ELibrary.Models
         public int Quantity { get; set; }
 
         public ICollection<Borrowing> Borrowings { get; set; }
-        
+
         public ICollection<BookAuthor> BooksAuthors { get; set; }
     }
 }

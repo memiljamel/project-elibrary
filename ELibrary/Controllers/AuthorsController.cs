@@ -27,9 +27,9 @@ namespace ELibrary.Controllers
             {
                 return NotFound();
             }
-            
+
             var authors = await _unitOfWork.AuthorRepository.GetPagedAuthors(search, pageNumber);
-            
+
             if (authors.PageNumber != 1 && pageNumber > authors.PageCount)
             {
                 return NotFound();
@@ -40,9 +40,9 @@ namespace ELibrary.Controllers
                 ID = a.ID,
                 Name = a.Name,
                 Email = a.Email,
-                BookCount = a.BooksAuthors.Count
+                BookCount = a.BooksAuthors.Count,
             });
-            
+
             return View(items);
         }
 
@@ -67,7 +67,7 @@ namespace ELibrary.Controllers
                 Email = author.Email,
                 BookCount = author.BooksAuthors.Count,
                 CreatedAt = author.CreatedAt,
-                UpdatedAt = author.UpdatedAt
+                UpdatedAt = author.UpdatedAt,
             };
 
             return View(item);
@@ -78,23 +78,18 @@ namespace ELibrary.Controllers
         {
             return View();
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(
-            [Bind("ID,Name,Email")] AuthorFormViewModel item)
+        public async Task<IActionResult> Create([Bind("ID,Name,Email")] FormAuthorViewModel item)
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var author = new Author
-                    {
-                        Name = item.Name,
-                        Email = item.Email
-                    };
+                    var author = new Author { Name = item.Name, Email = item.Email };
                     _unitOfWork.AuthorRepository.Add(author);
-                    
+
                     await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The author has been created.";
@@ -103,12 +98,15 @@ namespace ELibrary.Controllers
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                           "Try again, and if the problem persists " +
-                                                           "see your system administrator.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to save changes. "
+                            + "Try again, and if the problem persists "
+                            + "see your system administrator."
+                    );
                 }
             }
-            
+
             return View(item);
         }
 
@@ -126,21 +124,22 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var item = new AuthorFormViewModel
+            var item = new FormAuthorViewModel
             {
                 ID = author.ID,
                 Name = author.Name,
-                Email = author.Email
+                Email = author.Email,
             };
-            
+
             return View(item);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(
-            Guid id, 
-            [Bind("ID,Name,Email")] AuthorFormViewModel item)
+            Guid id,
+            [Bind("ID,Name,Email")] FormAuthorViewModel item
+        )
         {
             if (id != item.ID)
             {
@@ -158,24 +157,27 @@ namespace ELibrary.Controllers
                         author.Email = item.Email;
                         author.UpdatedAt = DateTime.UtcNow;
                     }
-                    
+
                     await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The author has been updated.";
-                    
+
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                           "Try again, and if the problem persists, " +
-                                                           "see your system administrator.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to save changes. "
+                            + "Try again, and if the problem persists, "
+                            + "see your system administrator."
+                    );
                 }
             }
-            
+
             return View(item);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(Guid id)

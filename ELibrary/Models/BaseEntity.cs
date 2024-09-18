@@ -12,7 +12,7 @@ namespace ELibrary.Models
 
         [Column("created_at", Order = 98)]
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-        
+
         [Column("updated_at", Order = 99)]
         public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     }

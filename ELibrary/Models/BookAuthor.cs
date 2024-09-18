@@ -16,7 +16,7 @@ namespace ELibrary.Models
         public Guid AuthorID { get; set; }
 
         public Book Book { get; set; }
-        
+
         public Author Author { get; set; }
     }
 }
