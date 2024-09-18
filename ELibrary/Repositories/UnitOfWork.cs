@@ -6,7 +6,7 @@ namespace ELibrary.Repositories
     {
         private readonly ELibraryContext _context;
 
-        private IEmployeeRepository _employeeRepository;
+        private IStaffRepository _staffRepository;
         private IMemberRepository _memberRepository;
         private IPhoneRepository _phoneRepository;
         private IAuthorRepository _authorRepository;
@@ -19,16 +19,16 @@ namespace ELibrary.Repositories
             _context = context;
         }
 
-        public IEmployeeRepository EmployeeRepository
+        public IStaffRepository StaffRepository
         {
             get
             {
-                if (_employeeRepository == null)
+                if (_staffRepository == null)
                 {
-                    _employeeRepository = new EmployeeRepository(_context);
+                    _staffRepository = new StaffRepository(_context);
                 }
 
-                return _employeeRepository;
+                return _staffRepository;
             }
         }
 
@@ -57,7 +57,7 @@ namespace ELibrary.Repositories
                 return _phoneRepository;
             }
         }
-        
+
         public IAuthorRepository AuthorRepository
         {
             get
@@ -83,7 +83,7 @@ namespace ELibrary.Repositories
                 return _bookRepository;
             }
         }
-        
+
         public IBookAuthorRepository BookAuthorRepository
         {
             get

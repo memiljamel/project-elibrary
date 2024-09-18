@@ -1,4 +1,5 @@
 ﻿using Bogus;
+using ELibrary.Enums;
 using ELibrary.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,11 +8,9 @@ namespace ELibrary.Data
     public class ELibraryContext : DbContext
     {
         public ELibraryContext(DbContextOptions<ELibraryContext> options)
-            : base(options)
-        {
-        }
+            : base(options) { }
 
-        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Staff> Staffs { get; set; }
         public DbSet<Member> Members { get; set; }
         public DbSet<Phone> Phones { get; set; }
         public DbSet<Book> Books { get; set; }
@@ -21,17 +20,17 @@ namespace ELibrary.Data
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            var employees = new Faker<Employee>()
+            var staffs = new Faker<Staff>()
                 .RuleFor(e => e.ID, f => Guid.NewGuid())
                 .RuleFor(e => e.Username, f => f.Internet.UserName())
                 .RuleFor(e => e.Password, f => f.Internet.Password())
                 .RuleFor(e => e.Name, f => f.Name.FullName())
-                .RuleFor(e => e.EmployeeNumber, f => f.Random.Replace("EMP-#####"))
-                .RuleFor(e => e.AccessLevel, f => f.PickRandom<AccessLevel>())
+                .RuleFor(e => e.StaffNumber, f => f.Random.Replace("STF-#####"))
+                .RuleFor(e => e.AccessLevel, f => f.PickRandom<AccessLevelEnum>())
                 .RuleFor(e => e.CreatedAt, f => f.Date.Past())
                 .RuleFor(e => e.UpdatedAt, f => f.Date.Recent())
                 .Generate(25);
-            
+
             var members = new Faker<Member>()
                 .RuleFor(m => m.ID, f => Guid.NewGuid())
                 .RuleFor(m => m.MemberNumber, f => f.Random.Replace("MEM-#####"))
@@ -41,7 +40,7 @@ namespace ELibrary.Data
                 .RuleFor(m => m.CreatedAt, f => f.Date.Past())
                 .RuleFor(m => m.UpdatedAt, f => f.Date.Recent())
                 .Generate(25);
-            
+
             var phones = new List<Phone>();
 
             foreach (var member in members)
@@ -56,17 +55,17 @@ namespace ELibrary.Data
 
                 phones.AddRange(phone);
             }
-            
+
             var books = new Faker<Book>()
                 .RuleFor(b => b.ID, f => Guid.NewGuid())
                 .RuleFor(b => b.Title, f => f.Lorem.Sentence(3))
-                .RuleFor(b => b.Category, f => f.PickRandom<Category>())
+                .RuleFor(b => b.Category, f => f.PickRandom<CategoryEnum>())
                 .RuleFor(b => b.Publisher, f => f.Company.CompanyName())
                 .RuleFor(b => b.Quantity, f => f.Random.Int(1, 100))
                 .RuleFor(b => b.CreatedAt, f => f.Date.Past())
                 .RuleFor(b => b.UpdatedAt, f => f.Date.Recent())
                 .Generate(25);
-            
+
             var borrowings = new List<Borrowing>();
 
             foreach (var member in members)
@@ -83,7 +82,7 @@ namespace ELibrary.Data
 
                 borrowings.AddRange(borrowing);
             }
-            
+
             var authors = new Faker<Author>()
                 .RuleFor(a => a.ID, f => Guid.NewGuid())
                 .RuleFor(a => a.Name, f => f.Name.FullName())
@@ -91,7 +90,7 @@ namespace ELibrary.Data
                 .RuleFor(a => a.CreatedAt, f => f.Date.Past())
                 .RuleFor(a => a.UpdatedAt, f => f.Date.Recent())
                 .Generate(50);
-            
+
             var booksAuthors = new List<BookAuthor>();
 
             foreach (var book in books)
@@ -103,8 +102,8 @@ namespace ELibrary.Data
 
                 booksAuthors.AddRange(bookAuthor);
             }
-            
-            modelBuilder.Entity<Employee>().HasData(employees);
+
+            modelBuilder.Entity<Staff>().HasData(staffs);
             modelBuilder.Entity<Member>().HasData(members);
             modelBuilder.Entity<Phone>().HasData(phones);
             modelBuilder.Entity<Book>().HasData(books);

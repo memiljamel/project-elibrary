@@ -30,12 +30,9 @@ namespace ELibrary.Controllers
             {
                 return RedirectToAction(nameof(HomeController.Index), "Home");
             }
-            
-            var item = new LoginViewModel
-            {
-                RememberMe = true
-            };
-            
+
+            var item = new LoginViewModel { RememberMe = true };
+
             return View(item);
         }
 
@@ -43,15 +40,16 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         [AllowAnonymous]
         public async Task<IActionResult> Login(
-            [Bind("Username,Password,RememberMe")] LoginViewModel item, 
-            string? returnUrl = null)
+            [Bind("Username,Password,RememberMe")] LoginViewModel item,
+            string? returnUrl = null
+        )
         {
             ViewData["ReturnUrl"] = returnUrl;
 
             if (ModelState.IsValid)
             {
-                var user = await _unitOfWork.EmployeeRepository.GetEmployeeByUsername(item.Username);
-                
+                var user = await _unitOfWork.StaffRepository.GetStaffByUsername(item.Username);
+
                 if (user == null || !BC.Verify(item.Password, user.Password))
                 {
                     ModelState.AddModelError(nameof(item.Username), "Invalid login attempt.");
@@ -62,10 +60,13 @@ namespace ELibrary.Controllers
                 var claims = new List<Claim>
                 {
                     new Claim(ClaimTypes.Name, user.Username),
-                    new Claim(ClaimTypes.Role, user.AccessLevel.ToString())
+                    new Claim(ClaimTypes.Role, user.AccessLevel.ToString()),
                 };
-                
-                var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                var claimsIdentity = new ClaimsIdentity(
+                    claims,
+                    CookieAuthenticationDefaults.AuthenticationScheme
+                );
 
                 var authProperties = new AuthenticationProperties
                 {
@@ -73,22 +74,23 @@ namespace ELibrary.Controllers
                     ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(10),
                     IsPersistent = item.RememberMe,
                     IssuedUtc = DateTimeOffset.UtcNow,
-                    RedirectUri = "/Home/Index"
+                    RedirectUri = "/Home/Index",
                 };
-                
-                await HttpContext.SignInAsync(
-                    CookieAuthenticationDefaults.AuthenticationScheme, 
-                    new ClaimsPrincipal(claimsIdentity), 
-                    authProperties);
 
-                return Url.IsLocalUrl(returnUrl) 
-                    ? Redirect(returnUrl) 
+                await HttpContext.SignInAsync(
+                    CookieAuthenticationDefaults.AuthenticationScheme,
+                    new ClaimsPrincipal(claimsIdentity),
+                    authProperties
+                );
+
+                return Url.IsLocalUrl(returnUrl)
+                    ? Redirect(returnUrl)
                     : RedirectToAction(nameof(HomeController.Index), "Home");
             }
-            
+
             return View(item);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout()
@@ -97,62 +99,67 @@ namespace ELibrary.Controllers
 
             return RedirectToAction(nameof(Login));
         }
-        
+
         [HttpGet]
         public async Task<IActionResult> Profile()
         {
             var username = User.Identity?.Name;
-            
+
             if (username == null)
             {
                 return NotFound();
             }
-            
-            var employee = await _unitOfWork.EmployeeRepository.GetEmployeeByUsername(username);
-            if (employee == null)
+
+            var staff = await _unitOfWork.StaffRepository.GetStaffByUsername(username);
+            if (staff == null)
             {
                 return NotFound();
             }
-            
+
             var item = new ProfileViewModel
             {
-                EmployeeNumber = employee.EmployeeNumber,
-                Name = employee.Name,
-                AccessLevel = employee.AccessLevel,
-                Username = employee.Username
+                ID = staff.ID,
+                StaffNumber = staff.StaffNumber,
+                Name = staff.Name,
+                AccessLevel = staff.AccessLevel,
+                Username = staff.Username,
             };
-            
+
             return View(item);
         }
-        
+
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Profile(
-            [Bind("ID,Name,EmployeeNumber,AccessLevel,Username,Password,PasswordConfirmation")] ProfileViewModel item)
+            [Bind("ID,Name,StaffNumber,AccessLevel,Username,Password,PasswordConfirmation")]
+                ProfileViewModel item
+        )
         {
             var username = User.Identity?.Name;
-            
+
             if (username == null)
             {
                 return NotFound();
             }
-            
+
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var employee = await _unitOfWork.EmployeeRepository.GetEmployeeByUsername(username);
-                    if (employee != null)
+                    var staff = await _unitOfWork.StaffRepository.GetStaffByUsername(username);
+                    if (staff != null)
                     {
-                        employee.Name = item.Name;
-                        employee.UpdatedAt = DateTime.UtcNow;
+                        staff.StaffNumber = item.StaffNumber;
+                        staff.Name = item.Name;
+                        staff.Username = item.Username;
+                        staff.UpdatedAt = DateTime.UtcNow;
 
                         if (!string.IsNullOrEmpty(item.Password))
                         {
-                            employee.Password = BC.HashPassword(item.Password);
+                            staff.Password = BC.HashPassword(item.Password);
                         }
                     }
-                    
+
                     await _unitOfWork.SaveChangesAsync();
 
                     TempData["Message"] = "The profile has been updated.";
@@ -161,12 +168,15 @@ namespace ELibrary.Controllers
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                           "Try again, and if the problem persists, " +
-                                                           "see your system administrator.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to save changes. "
+                            + "Try again, and if the problem persists, "
+                            + "see your system administrator."
+                    );
                 }
             }
-            
+
             return View(item);
         }
     }

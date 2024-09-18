@@ -10,11 +10,11 @@ using BC = BCrypt.Net.BCrypt;
 namespace ELibrary.Controllers
 {
     [Authorize]
-    public class EmployeesController : Controller
+    public class StaffsController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
 
-        public EmployeesController(IUnitOfWork unitOfWork)
+        public StaffsController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
@@ -29,20 +29,20 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var employees = await _unitOfWork.EmployeeRepository.GetPagedEmployees(search, pageNumber);
+            var staffs = await _unitOfWork.StaffRepository.GetPagedStaffs(search, pageNumber);
 
-            if (employees.PageNumber != 1 && pageNumber > employees.PageCount)
+            if (staffs.PageNumber != 1 && pageNumber > staffs.PageCount)
             {
                 return NotFound();
             }
 
-            var items = employees.Select(e => new EmployeeViewModel
+            var items = staffs.Select(s => new StaffViewModel
             {
-                ID = e.ID,
-                EmployeeNumber = e.EmployeeNumber,
-                Name = e.Name,
-                AccessLevel = e.AccessLevel,
-                Username = e.Username
+                ID = s.ID,
+                StaffNumber = s.StaffNumber,
+                Name = s.Name,
+                AccessLevel = s.AccessLevel,
+                Username = s.Username,
             });
 
             return View(items);
@@ -56,21 +56,21 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var employee = await _unitOfWork.EmployeeRepository.GetById(id);
-            if (employee == null)
+            var staff = await _unitOfWork.StaffRepository.GetById(id);
+            if (staff == null)
             {
                 return NotFound();
             }
 
-            var item = new EmployeeViewModel
+            var item = new StaffViewModel
             {
-                ID = employee.ID,
-                EmployeeNumber = employee.EmployeeNumber,
-                Name = employee.Name,
-                AccessLevel = employee.AccessLevel,
-                Username = employee.Username,
-                CreatedAt = employee.CreatedAt,
-                UpdatedAt = employee.UpdatedAt
+                ID = staff.ID,
+                StaffNumber = staff.StaffNumber,
+                Name = staff.Name,
+                AccessLevel = staff.AccessLevel,
+                Username = staff.Username,
+                CreatedAt = staff.CreatedAt,
+                UpdatedAt = staff.UpdatedAt,
             };
 
             return View(item);
@@ -87,34 +87,38 @@ namespace ELibrary.Controllers
         [ValidateAntiForgeryToken]
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Create(
-            [Bind("EmployeeNumber,Name,AccessLevel,Username,Password,PasswordConfirmation")]
-            EmployeeCreateViewModel item)
+            [Bind("StaffNumber,Name,AccessLevel,Username,Password,PasswordConfirmation")]
+                CreateStaffViewModel item
+        )
         {
             if (ModelState.IsValid)
             {
                 try
                 {
-                    var employee = new Employee
+                    var staff = new Staff
                     {
-                        EmployeeNumber = item.EmployeeNumber,
+                        StaffNumber = item.StaffNumber,
                         Name = item.Name,
                         AccessLevel = item.AccessLevel,
                         Username = item.Username,
-                        Password = BC.HashPassword(item.Password)
+                        Password = BC.HashPassword(item.Password),
                     };
-                    _unitOfWork.EmployeeRepository.Add(employee);
-                    
+                    _unitOfWork.StaffRepository.Add(staff);
+
                     await _unitOfWork.SaveChangesAsync();
 
-                    TempData["Message"] = "The employee has been created.";
+                    TempData["Message"] = "The staff has been created.";
 
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                           "Try again, and if the problem persists " +
-                                                           "see your system administrator.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to save changes. "
+                            + "Try again, and if the problem persists "
+                            + "see your system administrator."
+                    );
                 }
             }
 
@@ -130,19 +134,19 @@ namespace ELibrary.Controllers
                 return NotFound();
             }
 
-            var employee = await _unitOfWork.EmployeeRepository.GetById(id);
-            if (employee == null)
+            var staff = await _unitOfWork.StaffRepository.GetById(id);
+            if (staff == null)
             {
                 return NotFound();
             }
 
-            var item = new EmployeeEditViewModel
+            var item = new EditStaffViewModel
             {
-                ID = employee.ID,
-                EmployeeNumber = employee.EmployeeNumber,
-                Name = employee.Name,
-                AccessLevel = employee.AccessLevel,
-                Username = employee.Username
+                ID = staff.ID,
+                StaffNumber = staff.StaffNumber,
+                Name = staff.Name,
+                AccessLevel = staff.AccessLevel,
+                Username = staff.Username,
             };
 
             return View(item);
@@ -153,8 +157,9 @@ namespace ELibrary.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Edit(
             Guid id,
-            [Bind("ID,EmployeeNumber,Name,AccessLevel,Username,Password,PasswordConfirmation")]
-            EmployeeEditViewModel item)
+            [Bind("ID,StaffNumber,Name,AccessLevel,Username,Password,PasswordConfirmation")]
+                EditStaffViewModel item
+        )
         {
             if (id != item.ID)
             {
@@ -165,31 +170,35 @@ namespace ELibrary.Controllers
             {
                 try
                 {
-                    var employee = await _unitOfWork.EmployeeRepository.GetById(id);
-                    if (employee != null)
+                    var staff = await _unitOfWork.StaffRepository.GetById(id);
+                    if (staff != null)
                     {
-                        employee.EmployeeNumber = item.EmployeeNumber;
-                        employee.Name = item.Name;
-                        employee.AccessLevel = item.AccessLevel;
-                        employee.UpdatedAt = DateTime.UtcNow;
+                        staff.StaffNumber = item.StaffNumber;
+                        staff.Name = item.Name;
+                        staff.AccessLevel = item.AccessLevel;
+                        staff.Username = item.Username;
+                        staff.UpdatedAt = DateTime.UtcNow;
 
                         if (!string.IsNullOrEmpty(item.Password))
                         {
-                            employee.Password = BC.HashPassword(item.Password);
+                            staff.Password = BC.HashPassword(item.Password);
                         }
                     }
-                    
+
                     await _unitOfWork.SaveChangesAsync();
 
-                    TempData["Message"] = "The employee has been updated.";
+                    TempData["Message"] = "The staff has been updated.";
 
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateException)
                 {
-                    ModelState.AddModelError(string.Empty, "Unable to save changes. " +
-                                                           "Try again, and if the problem persists, " +
-                                                           "see your system administrator.");
+                    ModelState.AddModelError(
+                        string.Empty,
+                        "Unable to save changes. "
+                            + "Try again, and if the problem persists, "
+                            + "see your system administrator."
+                    );
                 }
             }
 
@@ -201,15 +210,15 @@ namespace ELibrary.Controllers
         [Authorize(Roles = "Administrator")]
         public async Task<IActionResult> Delete(Guid id)
         {
-            var employee = await _unitOfWork.EmployeeRepository.GetById(id);
-            if (employee != null)
+            var staff = await _unitOfWork.StaffRepository.GetById(id);
+            if (staff != null)
             {
-                _unitOfWork.EmployeeRepository.Remove(employee);
+                _unitOfWork.StaffRepository.Remove(staff);
             }
 
             await _unitOfWork.SaveChangesAsync();
 
-            TempData["Message"] = "The employee has been deleted.";
+            TempData["Message"] = "The staff has been deleted.";
 
             return RedirectToAction(nameof(Index));
         }

@@ -1,18 +1,13 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using ELibrary.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace ELibrary.Models
 {
-    public enum AccessLevel
-    {
-        Administrator,
-        Staff
-    }
-    
-    [Table("employees")]
-    [Index(nameof(Username), nameof(EmployeeNumber), IsUnique = true)]
-    public class Employee : BaseEntity
+    [Table("staffs")]
+    [Index(nameof(Username), nameof(StaffNumber), IsUnique = true)]
+    public class Staff : BaseEntity
     {
         [Required]
         [Column("username", Order = 1)]
@@ -31,11 +26,11 @@ namespace ELibrary.Models
 
         [Required]
         [MaxLength(16)]
-        [Column("employee_number", Order = 4)]
-        public string EmployeeNumber { get; set; }
+        [Column("staff_number", Order = 4)]
+        public string StaffNumber { get; set; }
 
         [Required]
         [Column("role", Order = 5)]
-        public AccessLevel AccessLevel { get; set; }
+        public AccessLevelEnum AccessLevel { get; set; }
     }
 }

@@ -2,7 +2,5 @@
 
 namespace ELibrary.Repositories
 {
-    public interface IBookAuthorRepository : IGenericRepository<BookAuthor>
-    {
-    }
+    public interface IBookAuthorRepository : IGenericRepository<BookAuthor> { }
 }

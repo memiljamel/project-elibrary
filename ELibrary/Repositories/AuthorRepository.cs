@@ -8,30 +8,34 @@ namespace ELibrary.Repositories
 {
     public class AuthorRepository : GenericRepository<Author>, IAuthorRepository
     {
-        public AuthorRepository(ELibraryContext context) : base(context)
-        {
-        }
+        public AuthorRepository(ELibraryContext context)
+            : base(context) { }
 
-        public async Task<IPagedList<Author>> GetPagedAuthors(string? search, int pageNumber, int pageSize = 15)
+        public async Task<IPagedList<Author>> GetPagedAuthors(
+            string? search,
+            int pageNumber,
+            int pageSize = 15
+        )
         {
-            var query = _context.Authors
-                .Include(a => a.BooksAuthors)
-                .AsQueryable();
-            
+            var query = _context.Authors.Include(a => a.BooksAuthors).AsQueryable();
+
             if (!string.IsNullOrEmpty(search))
             {
-                query = query.Where(a => a.Name.ToLower().Contains(search.ToLower()) ||
-                                         a.Email.ToLower().Contains(search.ToLower()));
+                query = query.Where(a =>
+                    a.Name.ToLower().Contains(search.ToLower())
+                    || a.Email.ToLower().Contains(search.ToLower())
+                );
             }
-            
-            return await query.OrderByDescending(a => a.CreatedAt)
+
+            return await query
+                .OrderByDescending(a => a.CreatedAt)
                 .ToPagedListAsync(pageNumber, pageSize);
         }
 
         public async Task<Author?> GetAuthorWithBooksAuthorsById(Guid? id)
         {
-            return await _context.Authors
-                .Include(a => a.BooksAuthors)
+            return await _context
+                .Authors.Include(a => a.BooksAuthors)
                 .FirstOrDefaultAsync(m => m.ID == id);
         }
     }

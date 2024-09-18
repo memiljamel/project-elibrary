@@ -2,11 +2,11 @@
 
 namespace ELibrary.ViewModels
 {
-    public class BorrowingCreateViewModel
+    public class CreateBorrowingViewModel
     {
         [Display(Name = "Member Number")]
         public Guid MemberID { get; set; }
-        
+
         [Display(Name = "Title")]
         public Guid BookID { get; set; }
 

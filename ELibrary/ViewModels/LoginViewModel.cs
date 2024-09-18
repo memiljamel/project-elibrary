@@ -6,7 +6,7 @@ namespace ELibrary.ViewModels
     {
         [DataType(DataType.Text)]
         public string Username { get; set; }
-        
+
         [DataType(DataType.Password)]
         public string Password { get; set; }
 

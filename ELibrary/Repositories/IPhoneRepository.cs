@@ -2,7 +2,5 @@
 
 namespace ELibrary.Repositories
 {
-    public interface IPhoneRepository : IGenericRepository<Phone>
-    {
-    }
+    public interface IPhoneRepository : IGenericRepository<Phone> { }
 }

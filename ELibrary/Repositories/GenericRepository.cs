@@ -3,7 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ELibrary.Repositories
 {
-    public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity> where TEntity : class
+    public abstract class GenericRepository<TEntity> : IGenericRepository<TEntity>
+        where TEntity : class
     {
         protected readonly ELibraryContext _context;
 
@@ -16,7 +17,7 @@ namespace ELibrary.Repositories
         {
             return await _context.Set<TEntity>().ToListAsync();
         }
-        
+
         public async Task<TEntity?> GetById(Guid? id)
         {
             return await _context.Set<TEntity>().FindAsync(id);
